@@ -23,6 +23,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // 1. Инициализируем Tab Bar Controller
         let tabBarController = UITabBarController()
         
+        tabBarController.tabBar.layer.borderColor = UIColor.lightGray.cgColor
+        tabBarController.tabBar.layer.borderWidth = 0.5
+        tabBarController.tabBar.clipsToBounds = true
+        
         // 2. Экран "Трекеры"
         let trackersVC = TrackersViewController()
         let trackersNav = UINavigationController(rootViewController: trackersVC)

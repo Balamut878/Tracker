@@ -8,97 +8,161 @@
 import UIKit
 
 class TrackersViewController: UIViewController {
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        // Фон экрана
-        view.backgroundColor = .white
-        
-        // Большой заголовок в навигационной шапке
-        title = "Трекеры"
-        navigationController?.navigationBar.prefersLargeTitles = true
-        
-        if var plusImage = UIImage(named: "iconPlus") {
-            plusImage = plusImage.withRenderingMode(.alwaysOriginal)
-            navigationItem.leftBarButtonItem = UIBarButtonItem(
-                image: plusImage,
-                style: .plain,
-                target: self,
-                action: #selector(addTrackerTapped)
-            )
+
+    // MARK: - UI Elements
+
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Трекеры"
+        label.font = UIFont.systemFont(ofSize: 34, weight: .bold)
+        label.textColor = .black
+        label.textAlignment = .left
+        return label
+    }()
+
+    private let plusButton: UIButton = {
+        let button = UIButton(type: .system)
+        if let plusImage = UIImage(named: "iconPlus")?.withRenderingMode(.alwaysOriginal) {
+            button.setImage(plusImage, for: .normal)
         }
-        
-        let dateButton = UIButton(type: .system)
-        dateButton.setTitle(currentDateString(), for: .normal) // Автоматическая дата
-        dateButton.setTitleColor(.black, for: .normal)
-        dateButton.backgroundColor = .systemGray5
-        dateButton.layer.cornerRadius = 8
-        dateButton.addTarget(self, action: #selector(dateButtonTapped), for: .touchUpInside)
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: dateButton)
-        
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+
+    private let dateButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Дата", for: .normal)
+        button.setTitleColor(.black, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        button.backgroundColor = .systemGray5
+        button.layer.cornerRadius = 8
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+
+    private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.placeholder = "Поиск"
         searchBar.searchBarStyle = .minimal
         searchBar.backgroundImage = UIImage()
-        
-        // Если хочешь настроить поле ввода (скруглённый белый фон):
-        if let textField = searchBar.searchTextField as? UITextField {
-            textField.backgroundColor = .systemGray6
-            textField.layer.cornerRadius = 8
-            textField.clipsToBounds = true
-        }
-        
         searchBar.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(searchBar)
-        
-        NSLayoutConstraint.activate([
-            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        ])
-        
-        let placeholderImage = UIImageView(image: UIImage(named: "iconPlaceholderStar"))
-        placeholderImage.tintColor = .gray
-        placeholderImage.translatesAutoresizingMaskIntoConstraints = false
-        
-        let placeholderLabel = UILabel()
-        placeholderLabel.text = "Что будем отслеживать?"
-        placeholderLabel.textColor = .gray
-        placeholderLabel.textAlignment = .center
-        placeholderLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(placeholderImage)
-        view.addSubview(placeholderLabel)
-        
-        NSLayoutConstraint.activate([
-            // Центрируем иконку чуть выше центра
-            placeholderImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            placeholderImage.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -20),
-            
-            // Делаем иконку 80×80
-            placeholderImage.widthAnchor.constraint(equalToConstant: 80),
-            placeholderImage.heightAnchor.constraint(equalToConstant: 80),
-            
-            // Текст под иконкой
-            placeholderLabel.topAnchor.constraint(equalTo: placeholderImage.bottomAnchor, constant: 8),
-            placeholderLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
-        ])
+
+        let textField = searchBar.searchTextField
+        textField.backgroundColor = .systemGray6
+        textField.layer.cornerRadius = 10
+        textField.layer.masksToBounds = true
+        textField.clipsToBounds = true
+
+        let placeholderAttributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: UIColor.gray,
+            .font: UIFont.systemFont(ofSize: 17, weight: .regular)
+        ]
+        textField.attributedPlaceholder = NSAttributedString(string: "Поиск", attributes: placeholderAttributes)
+
+        return searchBar
+    }()
+
+    private let placeholderImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "iconPlaceholderStar"))
+        imageView.tintColor = .gray
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+
+    private let placeholderLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Что будем отслеживать?"
+        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    // MARK: - Lifecycle
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        // Фон экрана
+        view.backgroundColor = .white
+
+        // Скрываем Navigation Bar
+        navigationController?.setNavigationBarHidden(true, animated: false)
+
+        // Настройка UI
+        setupUI()
     }
-    
+
+    // MARK: - UI Setup
+
+    private func setupUI() {
+        view.addSubview(titleLabel)
+        view.addSubview(plusButton)
+        view.addSubview(dateButton)
+        view.addSubview(searchBar)
+        view.addSubview(placeholderImageView)
+        view.addSubview(placeholderLabel)
+
+        plusButton.addTarget(self, action: #selector(addTrackerTapped), for: .touchUpInside)
+        dateButton.addTarget(self, action: #selector(dateButtonTapped), for: .touchUpInside)
+        dateButton.setTitle(currentDateString(), for: .normal)
+
+        setupConstraints()
+    }
+
+    private func setupConstraints() {
+        let safeArea = view.safeAreaLayoutGuide
+
+        NSLayoutConstraint.activate([
+            // Кнопка "+"
+            plusButton.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 16),
+            plusButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 6),
+            plusButton.widthAnchor.constraint(equalToConstant: 42),
+            plusButton.heightAnchor.constraint(equalToConstant: 42),
+
+            // Заголовок "Трекеры"
+            titleLabel.topAnchor.constraint(equalTo: plusButton.bottomAnchor, constant: 1),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: dateButton.leadingAnchor, constant: -8),
+
+            // Кнопка даты
+            dateButton.centerYAnchor.constraint(equalTo: plusButton.centerYAnchor),
+            dateButton.leadingAnchor.constraint(equalTo: plusButton.trailingAnchor,constant: 234),
+            dateButton.widthAnchor.constraint(equalToConstant: 77),
+            dateButton.heightAnchor.constraint(equalToConstant: 34),
+
+            // Поисковая строка
+            searchBar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 7),
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            searchBar.heightAnchor.constraint(equalToConstant: 36),
+
+            // Плейсхолдер (иконка)
+                placeholderImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 402),
+                placeholderImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                placeholderImageView.widthAnchor.constraint(equalToConstant: 80),
+                placeholderImageView.heightAnchor.constraint(equalToConstant: 80),
+
+                // Плейсхолдер (текст)
+                placeholderLabel.topAnchor.constraint(equalTo: placeholderImageView.bottomAnchor, constant: 8),
+                placeholderLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            ])
+    }
+
     // MARK: - Actions
-    
+
     @objc private func addTrackerTapped() {
         print("Кнопка «+» нажата")
     }
-    
+
     @objc private func dateButtonTapped() {
         print("Кнопка даты нажата")
     }
-    
+
     // MARK: - Helper
-    
-    /// Возвращает строку текущей даты в формате "dd.MM.yy"
+
     private func currentDateString() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd.MM.yy"
