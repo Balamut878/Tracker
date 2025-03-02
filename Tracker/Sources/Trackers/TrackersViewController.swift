@@ -154,6 +154,9 @@ class TrackersViewController: UIViewController {
     // MARK: - Actions
 
     @objc private func addTrackerTapped() {
+        let createTrackerVC = CreateTrackerViewController()
+        createTrackerVC.modalPresentationStyle = .pageSheet
+        present(createTrackerVC, animated: true, completion: nil)
         print("Кнопка «+» нажата")
     }
 
