@@ -13,4 +13,5 @@ struct Tracker {
     let emoji: String
     let color: UIColor
     let schedule: [Int] // Дни недели (например, [1,3,5] — Понедельник, Среда, Пятница)
+    var completedDates: [Date]
 }

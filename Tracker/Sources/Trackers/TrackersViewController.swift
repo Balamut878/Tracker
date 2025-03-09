@@ -9,9 +9,19 @@ import UIKit
 
 // Основной экран, где показывается список трекеров (каждый в своей ячейке)
 final class TrackersViewController: UIViewController {
-
+    // Словарь для хранения выполненных дат по каждому трекеру
+    private var completedTrackers: [UUID: [Date]] = [:]
+    
+    // MARK: - Properties
+    private var currentDate: Date = Date() {
+        didSet {
+            updateDateButtonTitle()
+            updateTrackersForSelectedDate()
+        }
+    }
+    
     // MARK: - UI Elements
-
+    
     // Заголовок экрана "Трекеры"
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -89,17 +99,19 @@ final class TrackersViewController: UIViewController {
         (
             "Домашний уют",
             [
-                Tracker(id: UUID(), name: "Поливать растения", emoji: "❤️", color: .systemGreen, schedule: [1, 3, 5])
+                Tracker(id: UUID(), name: "Поливать растения", emoji: "❤️", color: .systemGreen, schedule: [1, 3, 5], completedDates: [])
             ]
         ),
         (
             "Радостные мелочи",
             [
-                Tracker(id: UUID(), name: "Кошка заслонила камеру на созвоне", emoji: "😻", color: .systemOrange, schedule: [2, 4]),
-                Tracker(id: UUID(), name: "Бабушка прислала открытку в WhatsApp", emoji: "🌺", color: .systemRed, schedule: [1, 6])
+                Tracker(id: UUID(), name: "Кошка заслонила камеру на созвоне", emoji: "😻", color: .systemOrange, schedule: [2, 4], completedDates: []),
+                Tracker(id: UUID(), name: "Бабушка прислала открытку в WhatsApp", emoji: "🌺", color: .systemRed, schedule: [1, 6], completedDates: [])
             ]
         )
     ]
+    
+    private var filteredTrackers: [(category: String, items: [Tracker])] = []
     
     // MARK: - Lifecycle
     
@@ -115,6 +127,7 @@ final class TrackersViewController: UIViewController {
         // Настраиваем UI и CollectionView
         setupUI()
         setupCollectionView()
+        updateTrackersForSelectedDate()
     }
     
     // MARK: - UI Setup
@@ -133,7 +146,7 @@ final class TrackersViewController: UIViewController {
         dateButton.addTarget(self, action: #selector(dateButtonTapped), for: .touchUpInside)
         
         // Ставим на кнопке "Дата" текущую дату (пример)
-        dateButton.setTitle(currentDateString(), for: .normal)
+        updateDateButtonTitle()
         
         // Устанавливаем констрейнты
         setupConstraints()
@@ -190,12 +203,12 @@ final class TrackersViewController: UIViewController {
         collectionView.delegate = self
         
         // Настройка отступов и расстояний между ячейками
-           if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
-               layout.sectionInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16) // Отступы по краям
-               layout.minimumInteritemSpacing = 16  // Отступ между элементами в ряду
-               layout.minimumLineSpacing = 16       // Отступ между рядами
-           }
-
+        if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            layout.sectionInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16) // Отступы по краям
+            layout.minimumInteritemSpacing = 16  // Отступ между элементами в ряду
+            layout.minimumLineSpacing = 16       // Отступ между рядами
+        }
+        
         // Регистрируем класс TrackerCell с reuseIdentifier
         collectionView.register(
             TrackerCell.self,
@@ -224,50 +237,140 @@ final class TrackersViewController: UIViewController {
     
     // Метод, вызываемый при нажатии на "Дата"
     @objc private func dateButtonTapped() {
-        print("Кнопка даты нажата")
+        // Если контейнер уже существует, удаляем его
+        if let existingContainer = view.subviews.first(where: { $0.tag == 999 }) {
+            existingContainer.removeFromSuperview()
+            return
+        }
+
+        let datePicker = UIDatePicker()
+        datePicker.datePickerMode = .date
+        datePicker.locale = Locale(identifier: "ru_RU")
+        if #available(iOS 14.0, *) {
+            datePicker.preferredDatePickerStyle = .inline
+        } else {
+            datePicker.preferredDatePickerStyle = .wheels
+        }
+        datePicker.translatesAutoresizingMaskIntoConstraints = false
+        datePicker.date = currentDate
+        datePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
+
+        let container = UIView()
+        container.backgroundColor = .white
+        container.layer.cornerRadius = 13
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.layer.shadowColor = UIColor.black.cgColor
+        container.layer.shadowOpacity = 0.1
+        container.layer.shadowOffset = CGSize(width: 0, height: 10)
+        container.layer.shadowRadius = 60
+        container.tag = 999
+
+        view.addSubview(container)
+        container.addSubview(datePicker)
+
+        // Размещаем контейнер так, чтобы он НЕ перекрывал "Трекеры", но перекрывал поиск
+        // Привязываем верх контейнера чуть выше searchBar
+
+        NSLayoutConstraint.activate([
+            container.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            container.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            // Смещаем вверх на 8pt относительно searchBar
+            container.topAnchor.constraint(equalTo: searchBar.topAnchor, constant: -8),
+            container.heightAnchor.constraint(equalToConstant: 325),
+
+            datePicker.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            datePicker.centerYAnchor.constraint(equalTo: container.centerYAnchor)
+        ])
+
+        view.bringSubviewToFront(container)
     }
     
-    // Возвращает текущую дату строкой (формат "dd.MM.yy")
-    private func currentDateString() -> String {
+    @objc private func dateChanged(_ sender: UIDatePicker) {
+        currentDate = sender.date
+        dismiss(animated: true)
+    }
+    
+    private func updateDateButtonTitle() {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd.MM.yy"
-        return formatter.string(from: Date())
+        dateButton.setTitle(formatter.string(from: currentDate), for: .normal)
     }
+    
+    private func updateTrackersForSelectedDate() {
+    filteredTrackers = trackers.map { category in
+        let filteredItems = category.items
+        return (category.category, filteredItems)
+    }.filter { !$0.items.isEmpty }
+        collectionView.reloadData()
+    }
+
+    private func toggleCompletion(for tracker: Tracker, at indexPath: IndexPath) {
+    let day = Calendar.current.startOfDay(for: currentDate)
+    
+    // Проверяем, есть ли записи в completedTrackers
+    if completedTrackers[tracker.id] == nil {
+        completedTrackers[tracker.id] = []
+    }
+    
+    if let existingIndex = completedTrackers[tracker.id]?.firstIndex(where: { Calendar.current.isDate($0, inSameDayAs: day) }) {
+        // Если дата уже есть, удаляем её (снимаем отметку)
+        completedTrackers[tracker.id]?.remove(at: existingIndex)
+    } else {
+        // Иначе добавляем новую отметку
+        completedTrackers[tracker.id]?.append(day)
+    }
+    
+    // Обновляем конкретную ячейку в CollectionView
+    collectionView.reloadItems(at: [indexPath])
+}
 }
 
 // MARK: - UICollectionViewDataSource
 
 extension TrackersViewController: UICollectionViewDataSource {
-
+    
     // Возвращает количество секций (категорий)
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return trackers.count
+        return filteredTrackers.count
     }
     
     // Возвращаем количество элементов в конкретной секции
     func collectionView(_ collectionView: UICollectionView,
                         numberOfItemsInSection section: Int) -> Int {
-        return trackers[section].items.count
+        return filteredTrackers[section].items.count
     }
     
     // Создаём/заполняем ячейку для indexPath
     func collectionView(_ collectionView: UICollectionView,
-                        cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        // Достаём ячейку по нашему идентификатору
-        guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: TrackerCell.identifier,
-            for: indexPath
-        ) as? TrackerCell else {
-            // Если почему-то не получилось, возвращаем пустую дефолтную
-            return UICollectionViewCell()
-        }
-        
-        // Берём трекер из массива
-        let tracker = trackers[indexPath.section].items[indexPath.item]
-        // Настраиваем ячейку: isCompleted = false, count = 0 (временно)
-        cell.configure(with: tracker, isCompleted: false, count: 0)
-        
-        return cell
+                    cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    guard let cell = collectionView.dequeueReusableCell(
+        withReuseIdentifier: TrackerCell.identifier,
+        for: indexPath
+    ) as? TrackerCell else {
+        return UICollectionViewCell()
+    }
+
+    let tracker = filteredTrackers[indexPath.section].items[indexPath.item]
+
+    // Проверяем, является ли выбранная дата будущей
+    let today = Calendar.current.startOfDay(for: Date())
+    let isFutureDate = Calendar.current.compare(currentDate, to: today, toGranularity: .day) == .orderedDescending
+    
+    // Считаем, сколько раз трекер был выполнен (не только сегодня, а за всю историю)
+    let completedDaysCount = completedTrackers[tracker.id]?.count ?? 0
+    let isCompletedToday = completedTrackers[tracker.id]?.contains { Calendar.current.isDate($0, inSameDayAs: currentDate) } ?? false
+    
+    cell.configure(with: tracker, isCompleted: isCompletedToday, count: completedDaysCount)
+    
+    // Запрещаем отметку для будущей даты
+    cell.completeButton.isEnabled = !isFutureDate
+    
+    cell.didTapComplete = { [weak self] in
+        guard let self = self, !isFutureDate else { return }
+        self.toggleCompletion(for: tracker, at: indexPath)
+    }
+
+    return cell
     }
     
     // Создаём/заполняем header (TrackerHeaderView) для секции
@@ -282,9 +385,9 @@ extension TrackersViewController: UICollectionViewDataSource {
         ) as? TrackerHeaderView else {
             return UICollectionReusableView()
         }
-
-        let categoryTitle = trackers[indexPath.section].category
-
+        
+        let categoryTitle = filteredTrackers[indexPath.section].category
+        
         // Управляй отступами вручную для каждого заголовка
         if categoryTitle == "Домашний уют" {
             header.configure(title: categoryTitle, leadingInset: 28, trailingInset: 198)
@@ -293,7 +396,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         } else {
             header.configure(title: categoryTitle, leadingInset: 28, trailingInset: 198)
         }
-
+        
         return header
     }
 }

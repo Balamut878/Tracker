@@ -74,7 +74,7 @@ final class TrackerCell: UICollectionViewCell {
     // tintColor = .white, чтобы цвет иконки был белым.
     // cornerRadius 17, значит сама кнопка будет круглой (34×34).
     // translatesAutoresizingMaskIntoConstraints = false для автолейаута.
-    private let completeButton: UIButton = {
+    internal let completeButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("", for: .normal)
         button.tintColor = .white
@@ -83,17 +83,20 @@ final class TrackerCell: UICollectionViewCell {
         return button
     }()
 
+    // MARK: - Коллбэк, который будет вызываться при нажатии на кнопку «+»
+    var didTapComplete: (() -> Void)?
+
     // MARK: - Инициализация
 
     // Стандартный инициализатор для UICollectionViewCell (через фрейм).
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setupUI() // выносим всю конфигурацию UI в отдельный метод
+        setupUI()
+        completeButton.addTarget(self, action: #selector(completeTapped), for: .touchUpInside)
     }
 
-    // Не используем инициализацию через NSCoder
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    @objc private func completeTapped() {
+        didTapComplete?()
     }
 
     // MARK: - Верстка внутренних элементов
@@ -123,9 +126,9 @@ final class TrackerCell: UICollectionViewCell {
 
             // Эмодзи (отступ 8pt сверху и слева внутри блока)
             emojiLabel.widthAnchor.constraint(equalToConstant: 24), // Фон 24x24
-                emojiLabel.heightAnchor.constraint(equalToConstant: 24),
-                emojiLabel.topAnchor.constraint(equalTo: eventBackgroundView.topAnchor, constant: 12),
-                emojiLabel.leadingAnchor.constraint(equalTo: eventBackgroundView.leadingAnchor, constant: 12),
+            emojiLabel.heightAnchor.constraint(equalToConstant: 24),
+            emojiLabel.topAnchor.constraint(equalTo: eventBackgroundView.topAnchor, constant: 12),
+            emojiLabel.leadingAnchor.constraint(equalTo: eventBackgroundView.leadingAnchor, constant: 12),
             // Название трекера внизу блока (отступы по бокам 8 и снизу 8)
             titleLabel.leadingAnchor.constraint(equalTo: eventBackgroundView.leadingAnchor, constant: 8),
             titleLabel.trailingAnchor.constraint(equalTo: eventBackgroundView.trailingAnchor, constant: -8),
@@ -149,8 +152,6 @@ final class TrackerCell: UICollectionViewCell {
         ])
     }
 
-    // MARK: - Заполнение данными
-
     // Метод configure вызывается при настройке ячейки
     // Параметры:
     // - tracker: модель трекера (имя, эмодзи, цвет и т.д.)
@@ -164,8 +165,16 @@ final class TrackerCell: UICollectionViewCell {
         emojiLabel.text = tracker.emoji
         titleLabel.text = tracker.name
 
-        // Счётчик дней. Например, "0 дней" или "1 день" или "5 дня" (упрощённо)
-        let dayString = (count == 1) ? "день" : "дня"
+        // Формируем текст для счетчика дней
+        let dayString: String
+        switch count % 10 {
+        case 1 where count % 100 != 11:
+            dayString = "день"
+        case 2...4 where !(11...14).contains(count % 100):
+            dayString = "дня"
+        default:
+            dayString = "дней"
+        }
         counterLabel.text = "\(count) \(dayString)"
 
         // Если трекер выполнен, показываем "checkmark", иначе "plus"
@@ -175,5 +184,9 @@ final class TrackerCell: UICollectionViewCell {
 
         // Фон кнопки делаем таким же, как у блока
         completeButton.backgroundColor = tracker.color
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
