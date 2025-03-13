@@ -8,10 +8,17 @@
 import UIKit
 
 struct Tracker {
+    enum TrackerType {
+        case habit
+        case irregularEvent
+    }
+    
     let id: UUID
     let name: String
     let emoji: String
     let color: UIColor
-    let schedule: [Int] // Дни недели (например, [1,3,5] — Понедельник, Среда, Пятница)
+    let schedule: [Int]?
+    let type: TrackerType
+    let createdDate: Date
     var completedDates: [Date]
 }

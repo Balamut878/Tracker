@@ -8,6 +8,7 @@
 import UIKit
 
 class CreateTrackerViewController: UIViewController {
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -15,7 +16,7 @@ class CreateTrackerViewController: UIViewController {
         setupUI()
     }
     
-    // Заголовок экрана
+    // MARK: - UI Элементы
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Создание трекера"
@@ -25,7 +26,6 @@ class CreateTrackerViewController: UIViewController {
         return label
     }()
     
-    // Кнопка "Привычка"
     private let habitButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Привычка", for: .normal)
@@ -37,7 +37,6 @@ class CreateTrackerViewController: UIViewController {
         return button
     }()
     
-    // Кнопка "Нерегулярное событие"
     private let eventButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Нерегулярное событие", for: .normal)
@@ -62,38 +61,36 @@ class CreateTrackerViewController: UIViewController {
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            // Создание трекера
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor,constant: 78),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 78),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 114),
             titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -112),
             titleLabel.widthAnchor.constraint(equalToConstant: 149),
             titleLabel.heightAnchor.constraint(equalToConstant: 22),
-            titleLabel.bottomAnchor.constraint(equalTo: habitButton.topAnchor,constant: -295),
-            // Кнопка "Привычка"
+            titleLabel.bottomAnchor.constraint(equalTo: habitButton.topAnchor, constant: -295),
             habitButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 395),
             habitButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             habitButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            habitButton.widthAnchor.constraint(equalToConstant: 335), // Фиксированная ширина
+            habitButton.widthAnchor.constraint(equalToConstant: 335),
             habitButton.heightAnchor.constraint(equalToConstant: 60),
-            // Кнопка "Нерегулярное событие"
             eventButton.topAnchor.constraint(equalTo: habitButton.bottomAnchor, constant: 16),
             eventButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             eventButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             eventButton.widthAnchor.constraint(equalToConstant: 335),
-            eventButton.heightAnchor.constraint(equalToConstant: 60),
-            
-            
+            eventButton.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
     
     @objc private func habitButtonTapped() {
-        let detailsVC = CreateTrackerDetailsViewController()
+        let detailsVC = CreateTrackerDetailsViewController(trackerType: .habit)
         detailsVC.modalPresentationStyle = .pageSheet
         present(detailsVC, animated: true, completion: nil)
         print("Выбрана Привычка")
     }
     
     @objc private func eventButtonTapped() {
+        let detailsVC = CreateTrackerDetailsViewController(trackerType: .irregularEvent)
+        detailsVC.modalPresentationStyle = .pageSheet
+        present(detailsVC, animated: true, completion: nil)
         print("Выбрано Нерегулярное событие")
     }
 }

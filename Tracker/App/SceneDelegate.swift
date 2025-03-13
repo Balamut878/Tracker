@@ -10,7 +10,7 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
-
+    
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
@@ -20,14 +20,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Создаём новое окно
         let newWindow = UIWindow(windowScene: windowScene)
         
-        // 1. Инициализируем Tab Bar Controller
+        // Инициализируем Tab Bar Controller
         let tabBarController = UITabBarController()
         
         tabBarController.tabBar.layer.borderColor = UIColor.lightGray.cgColor
         tabBarController.tabBar.layer.borderWidth = 0.5
         tabBarController.tabBar.clipsToBounds = true
         
-        // 2. Экран "Трекеры"
+        // Экран "Трекеры"
         let trackersVC = TrackersViewController()
         let trackersNav = UINavigationController(rootViewController: trackersVC)
         trackersNav.tabBarItem = UITabBarItem(
@@ -36,7 +36,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             tag: 0
         )
         
-        // 3. Экран "Статистика"
+        // Экран "Статистика"
         let statisticsVC = StatisticsViewController()
         let statisticsNav = UINavigationController(rootViewController: statisticsVC)
         statisticsNav.tabBarItem = UITabBarItem(
@@ -45,17 +45,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             tag: 1
         )
         
-        // 4. Добавляем вкладки в Tab Bar
+        // Добавляем вкладки в Tab Bar
         tabBarController.viewControllers = [trackersNav, statisticsNav]
         
-        // 5. Делаем TabBarController корневым контроллером
+        // Делаем TabBarController корневым контроллером
         newWindow.rootViewController = tabBarController
         newWindow.makeKeyAndVisible()
         
-        // 6. Сохраняем окно в свойство
+        // Сохраняем окно в свойство
         self.window = newWindow
     }
-
+    
     func sceneDidDisconnect(_ scene: UIScene) { }
     func sceneDidBecomeActive(_ scene: UIScene) { }
     func sceneWillResignActive(_ scene: UIScene) { }

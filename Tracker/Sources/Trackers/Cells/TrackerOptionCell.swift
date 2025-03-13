@@ -11,7 +11,7 @@ final class TrackerOptionCell: UITableViewCell {
     
     static let identifier = "TrackerOptionCell"
     
-    // Название опции (Категория, Расписание)
+    // MARK: - Вью с цветным фоном (Категория, Расписание)
     private let optionLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 17)
@@ -20,7 +20,7 @@ final class TrackerOptionCell: UITableViewCell {
         return label
     }()
     
-    // Выбранное значение (например, выбранная категория)
+    // MARK: - Выбранное значение
     private let valueLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 17)
@@ -30,7 +30,7 @@ final class TrackerOptionCell: UITableViewCell {
         return label
     }()
     
-    // Стрелочка для навигации
+    // MARK: - Стрелочка для навигации
     private let arrowImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(systemName: "chevron.right")
@@ -39,7 +39,7 @@ final class TrackerOptionCell: UITableViewCell {
         return imageView
     }()
     
-    // Разделительная линия
+    // MARK: - Разделительная линия
     private let separatorView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.systemGray4
@@ -63,19 +63,15 @@ final class TrackerOptionCell: UITableViewCell {
         contentView.addSubview(separatorView)
         
         NSLayoutConstraint.activate([
-            // Название опции
             optionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             optionLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             
-            // Выбранное значение
             valueLabel.trailingAnchor.constraint(equalTo: arrowImageView.leadingAnchor, constant: -8),
             valueLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             
-            // Стрелка навигации
             arrowImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             arrowImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             
-            // Разделительная линия (только для первой ячейки)
             separatorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             separatorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             separatorView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
@@ -86,6 +82,6 @@ final class TrackerOptionCell: UITableViewCell {
     func configure(with title: String, value: String?, isLastCell: Bool) {
         optionLabel.text = title
         valueLabel.text = value ?? ""
-        separatorView.isHidden = isLastCell // Скрываем разделитель у последней ячейки
+        separatorView.isHidden = isLastCell
     }
 }

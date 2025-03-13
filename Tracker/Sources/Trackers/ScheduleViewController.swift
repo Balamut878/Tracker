@@ -16,7 +16,6 @@ final class ScheduleViewController: UIViewController {
     
     // MARK: - Свойства
     weak var delegate: ScheduleViewControllerDelegate?
-
     private let daysFull = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
     private let daysShort = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
     private var selectedDays: Set<Int> = []
@@ -30,7 +29,7 @@ final class ScheduleViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-
+    
     private let tableViewContainer: UIView = {
         let view = UIView()
         view.backgroundColor = .systemGray6
@@ -39,7 +38,7 @@ final class ScheduleViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-
+    
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.isScrollEnabled = false
@@ -62,7 +61,7 @@ final class ScheduleViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-
+    
     // MARK: - Жизненный цикл
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -78,21 +77,18 @@ final class ScheduleViewController: UIViewController {
         view.addSubview(tableViewContainer)
         tableViewContainer.addSubview(tableView)
         view.addSubview(doneButton)
-
+        
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-
             tableViewContainer.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
             tableViewContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableViewContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             tableViewContainer.heightAnchor.constraint(equalToConstant: 525),
-
             tableView.topAnchor.constraint(equalTo: tableViewContainer.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: tableViewContainer.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: tableViewContainer.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: tableViewContainer.bottomAnchor),
-
             doneButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             doneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
@@ -118,8 +114,7 @@ final class ScheduleViewController: UIViewController {
         delegate?.didSelectSchedule(formattedSchedule)
         dismiss(animated: true)
     }
-
-    // Форматируем дни недели
+    
     private func formatSelectedDays() -> String {
         if selectedDays.count == 7 {
             return "Каждый день"
@@ -148,7 +143,7 @@ extension ScheduleViewController: UITableViewDelegate, UITableViewDataSource {
         switchControl.tag = indexPath.row
         switchControl.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
         cell.accessoryView = switchControl
-
+        
         if indexPath.row == 0 {
             cell.layer.cornerRadius = 16
             cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
@@ -160,14 +155,14 @@ extension ScheduleViewController: UITableViewDelegate, UITableViewDataSource {
         } else {
             cell.layer.cornerRadius = 0
         }
-
+        
         return cell
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75
     }
-
+    
     @objc private func switchChanged(_ sender: UISwitch) {
         let index = sender.tag
         if sender.isOn {
