@@ -14,6 +14,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
     
     private var options: [String] = []
     private var selectedValues: [String?] = []
+    private var selectedDaysIndices: [Int] = []
     
     // MARK: - UI Элементы
     private let titleLabel: UILabel = {
@@ -111,11 +112,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
         setupUI()
         setupTableView()
         
-        if trackerType == .habit {
-            tableViewContainerHeightConstraint.constant = 150
-        } else {
-            tableViewContainerHeightConstraint.constant = 75
-        }
+        tableViewContainerHeightConstraint.constant = trackerType == .habit ? 150 : 75
         
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         createButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
@@ -184,7 +181,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
             name: nameTextField.text ?? "",
             emoji: "🔥",
             color: .systemBlue,
-            schedule: (trackerType == .habit) ? [1,3,5] : nil,
+            schedule: trackerType == .habit ? selectedDaysIndices : nil,
             type: trackerType,
             createdDate: Date(),
             completedDates: []
@@ -228,10 +225,11 @@ extension CreateTrackerDetailsViewController: UITableViewDataSource, UITableView
 
 // MARK: - ScheduleViewControllerDelegate
 extension CreateTrackerDetailsViewController: ScheduleViewControllerDelegate {
-    func didSelectSchedule(_ formattedSchedule: String) {
+    func didSelectSchedule(_ formattedSchedule: String, chosenDays: [Int]) {
         if let scheduleIndex = options.firstIndex(of: "Расписание") {
             selectedValues[scheduleIndex] = formattedSchedule
             tableView.reloadRows(at: [IndexPath(row: scheduleIndex, section: 0)], with: .none)
         }
+        self.selectedDaysIndices = chosenDays
     }
 }

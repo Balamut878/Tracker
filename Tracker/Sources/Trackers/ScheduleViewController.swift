@@ -9,7 +9,7 @@ import UIKit
 
 // MARK: - Протокол делегата
 protocol ScheduleViewControllerDelegate: AnyObject {
-    func didSelectSchedule(_ formattedSchedule: String)
+    func didSelectSchedule(_ formattedSchedule: String, chosenDays: [Int])
 }
 
 final class ScheduleViewController: UIViewController {
@@ -111,16 +111,30 @@ final class ScheduleViewController: UIViewController {
     // MARK: - Обработчик кнопки "Готово"
     @objc private func doneTapped() {
         let formattedSchedule = formatSelectedDays()
-        delegate?.didSelectSchedule(formattedSchedule)
+        let sortedDays = selectedDays.sorted()
+        delegate?.didSelectSchedule(formattedSchedule, chosenDays: sortedDays)
         dismiss(animated: true)
     }
     
     private func formatSelectedDays() -> String {
+        // Допустим, 0..4 (Пн..Пт) — будни
+        let weekdaysSet: Set<Int> = [0,1,2,3,4]
+        
+        // Если выбран ровно набор [Пн..Пт]:
+        if selectedDays == weekdaysSet {
+            return "Будние дни"
+        }
+        
+        // Если выбраны все 7 дней:
         if selectedDays.count == 7 {
             return "Каждый день"
-        } else {
-            return selectedDays.sorted().map { daysShort[$0] }.joined(separator: ", ")
         }
+        
+        // Иначе — короткие названия
+        return selectedDays
+            .sorted()
+            .map { daysShort[$0] }
+            .joined(separator: ", ")
     }
 }
 

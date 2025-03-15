@@ -53,7 +53,7 @@ final class TrackerCell: UICollectionViewCell {
     }()
     
     // MARK: - Кнопка «+»
-    internal let completeButton: UIButton = {
+    let completeButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("", for: .normal)
         button.tintColor = .white

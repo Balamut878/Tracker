@@ -94,13 +94,7 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Mock Data
     private var trackers: [TrackerCategory] = [
-        TrackerCategory(title: "Домашний уют", trackers: [
-            Tracker(id: UUID(), name: "Поливать растения", emoji: "❤️", color: .systemGreen, schedule: [1, 3, 5], type: .habit, createdDate: Date(), completedDates: [])
-        ]),
-        TrackerCategory(title: "Радостные мелочи", trackers: [
-            Tracker(id: UUID(), name: "Кошка заслонила камеру на созвоне", emoji: "😻", color: .systemOrange, schedule: [2, 4], type: .habit, createdDate: Date(), completedDates: []),
-            Tracker(id: UUID(), name: "Бабушка прислала открытку в WhatsApp", emoji: "🌺", color: .systemRed, schedule: [1, 6], type: .irregularEvent, createdDate: Date(), completedDates: [])
-        ])
+        TrackerCategory(title: "По умолчанию", trackers: [])
     ]
     
     private var filteredTrackers: [(category: String, items: [Tracker])] = []
@@ -172,16 +166,26 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Actions
     @objc private func addTrackerTapped() {
-        let isIrregularEventCreation = false
-        if isIrregularEventCreation {
-            let createIrregularEventVC = CreateIrregularEventViewController()
-            createIrregularEventVC.modalPresentationStyle = .pageSheet
-            present(createIrregularEventVC, animated: true)
-            print("Экран создания нерегулярного события отображен")
-            return
-        }
+        // ...
         let createTrackerVC = CreateTrackerViewController()
         createTrackerVC.modalPresentationStyle = .pageSheet
+        
+        createTrackerVC.onCreateTracker = { [weak self] newTracker in
+            guard let self = self else { return }
+            let oldCategory = self.trackers[0]
+            var newTrackersArray = oldCategory.trackers
+            newTrackersArray.append(newTracker)
+            let updatedCategory = TrackerCategory(
+                title: oldCategory.title,
+                trackers: newTrackersArray
+            )
+            
+            var updatedCategories = self.trackers
+            updatedCategories[0] = updatedCategory
+            self.trackers = updatedCategories
+            self.updateTrackersForSelectedDate()
+        }
+        
         present(createTrackerVC, animated: true)
         print("Кнопка «+» нажата")
     }
@@ -237,12 +241,13 @@ final class TrackersViewController: UIViewController {
     
     private func updateTrackersForSelectedDate() {
         let calendar = Calendar.current
-        let selectedWeekday = calendar.component(.weekday, from: currentDate)
+        let systemWeekday = calendar.component(.weekday, from: currentDate)
+        let myWeekday = (systemWeekday + 5) % 7
         filteredTrackers = trackers.map { category in
             let filteredItems = category.trackers.filter { tracker in
                 switch tracker.type {
                 case .habit:
-                    return tracker.schedule?.contains(selectedWeekday) ?? false
+                    return tracker.schedule?.contains(myWeekday) ?? false
                 case .irregularEvent:
                     return Calendar.current.isDate(tracker.createdDate, inSameDayAs: currentDate)
                 }

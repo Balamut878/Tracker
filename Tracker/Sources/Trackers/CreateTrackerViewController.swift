@@ -7,7 +7,9 @@
 
 import UIKit
 
-class CreateTrackerViewController: UIViewController {
+final class CreateTrackerViewController: UIViewController {
+    
+    var onCreateTracker: ((Tracker) -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -83,6 +85,13 @@ class CreateTrackerViewController: UIViewController {
     @objc private func habitButtonTapped() {
         let detailsVC = CreateTrackerDetailsViewController(trackerType: .habit)
         detailsVC.modalPresentationStyle = .pageSheet
+        
+        detailsVC.onCreateTracker = { [weak self] newTracker in
+            guard let self = self else { return }
+            self.onCreateTracker?(newTracker)
+            self.dismiss(animated: true)
+        }
+        
         present(detailsVC, animated: true, completion: nil)
         print("Выбрана Привычка")
     }
@@ -90,6 +99,13 @@ class CreateTrackerViewController: UIViewController {
     @objc private func eventButtonTapped() {
         let detailsVC = CreateTrackerDetailsViewController(trackerType: .irregularEvent)
         detailsVC.modalPresentationStyle = .pageSheet
+        
+        detailsVC.onCreateTracker = { [weak self] newTracker in
+            guard let self = self else { return }
+            self.onCreateTracker?(newTracker)
+            self.dismiss(animated: true)
+        }
+        
         present(detailsVC, animated: true, completion: nil)
         print("Выбрано Нерегулярное событие")
     }
