@@ -20,5 +20,5 @@ struct Tracker {
     let schedule: [Int]?
     let type: TrackerType
     let createdDate: Date
-    var completedDates: [Date]
+    let completedDates: [Date]
 }
