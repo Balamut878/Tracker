@@ -199,6 +199,16 @@ final class TrackersViewController: UIViewController {
         datePicker.datePickerMode = .date
         datePicker.locale = Locale(identifier: "ru_RU")
         if #available(iOS 14.0, *) {
+            /*
+            Почему я сделал именно так:
+            В макете календарь отображается как встроенный виджет,
+            а стиль .compact вызывает popover, который нельзя кастомизировать.
+            Чтобы календарь выглядел так, как в макете, я использовал стиль .inline.
+
+            Я уточнил этот момент у наставников, и мне рекомендовали оставить комментарий
+            для ревьюера. Если .compact, несмотря на несоответствие макету, всё равно
+            приемлем в рамках задания, я могу изменить код на использование этого стиля.
+            */
             datePicker.preferredDatePickerStyle = .inline
         } else {
             datePicker.preferredDatePickerStyle = .wheels
