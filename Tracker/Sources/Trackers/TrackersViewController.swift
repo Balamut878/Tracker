@@ -18,6 +18,13 @@ final class TrackersViewController: UIViewController {
         }
     }
     
+    // MARK: - Данные из Core Data
+    private var trackers: [TrackerCategory] = []
+    private let trackerStore = TrackerStore()
+    private let categoryStore = TrackerCategoryStore()
+    
+    private var filteredTrackers: [(category: String, items: [Tracker])] = []
+    
     // MARK: - UI Elements
     private let emptyPlaceholderView: UIView = {
         let container = UIView()
@@ -92,13 +99,6 @@ final class TrackersViewController: UIViewController {
         return collectionView
     }()
     
-    // MARK: - Mock Data
-    private var trackers: [TrackerCategory] = [
-        TrackerCategory(title: "По умолчанию", trackers: [])
-    ]
-    
-    private var filteredTrackers: [(category: String, items: [Tracker])] = []
-    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -106,7 +106,7 @@ final class TrackersViewController: UIViewController {
         navigationController?.setNavigationBarHidden(true, animated: false)
         setupUI()
         setupCollectionView()
-        updateTrackersForSelectedDate()
+        loadData()
     }
     
     // MARK: - UI Setup
@@ -164,26 +164,39 @@ final class TrackersViewController: UIViewController {
         collectionView.register(TrackerHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: TrackerHeaderView.identifier)
     }
     
+    // MARK: - Data Loading
+    private func loadData() {
+        let categoriesCD = categoryStore.fetchAllCategories()
+        if categoriesCD.isEmpty {
+            let defaultCategoryCD = categoryStore.createCategory(title: "По умолчанию")
+            if let defaultCategory = categoryStore.makeCategory(from: defaultCategoryCD) {
+                trackers = [defaultCategory]
+            }
+        } else {
+            trackers = categoriesCD.compactMap { categoryStore.makeCategory(from: $0) }
+        }
+        updateTrackersForSelectedDate()
+    }
+    
     // MARK: - Actions
     @objc private func addTrackerTapped() {
-        // ...
         let createTrackerVC = CreateTrackerViewController()
         createTrackerVC.modalPresentationStyle = .pageSheet
         
         createTrackerVC.onCreateTracker = { [weak self] newTracker in
             guard let self = self else { return }
-            let oldCategory = self.trackers[0]
-            var newTrackersArray = oldCategory.trackers
-            newTrackersArray.append(newTracker)
-            let updatedCategory = TrackerCategory(
-                title: oldCategory.title,
-                trackers: newTrackersArray
-            )
-            
-            var updatedCategories = self.trackers
-            updatedCategories[0] = updatedCategory
-            self.trackers = updatedCategories
-            self.updateTrackersForSelectedDate()
+            // Находим категорию "По умолчанию"
+            let categoriesCD = self.categoryStore.fetchAllCategories()
+            var defaultCategoryCD: TrackerCategoryCoreData?
+            if let category = categoriesCD.first(where: { $0.title == "По умолчанию" }) {
+                defaultCategoryCD = category
+            } else {
+                defaultCategoryCD = self.categoryStore.createCategory(title: "По умолчанию")
+            }
+            if let defaultCategoryCD = defaultCategoryCD {
+                self.trackerStore.createTracker(newTracker, category: defaultCategoryCD)
+                self.loadData()
+            }
         }
         
         present(createTrackerVC, animated: true)
@@ -199,16 +212,6 @@ final class TrackersViewController: UIViewController {
         datePicker.datePickerMode = .date
         datePicker.locale = Locale(identifier: "ru_RU")
         if #available(iOS 14.0, *) {
-            /*
-            Почему я сделал именно так:
-            В макете календарь отображается как встроенный виджет,
-            а стиль .compact вызывает popover, который нельзя кастомизировать.
-            Чтобы календарь выглядел так, как в макете, я использовал стиль .inline.
-
-            Я уточнил этот момент у наставников, и мне рекомендовали оставить комментарий
-            для ревьюера. Если .compact, несмотря на несоответствие макету, всё равно
-            приемлем в рамках задания, я могу изменить код на использование этого стиля.
-            */
             datePicker.preferredDatePickerStyle = .inline
         } else {
             datePicker.preferredDatePickerStyle = .wheels
