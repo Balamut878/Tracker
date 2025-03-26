@@ -23,26 +23,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
     private var selectedEmojiIndex: IndexPath?
     private var selectedColorIndex: IndexPath?
     
-    private let colorList: [UIColor] = [
-        UIColor(named: "Color selection 1")!,
-        UIColor(named: "Color selection 2")!,
-        UIColor(named: "Color selection 3")!,
-        UIColor(named: "Color selection 4")!,
-        UIColor(named: "Color selection 5")!,
-        UIColor(named: "Color selection 6")!,
-        UIColor(named: "Color selection 7")!,
-        UIColor(named: "Color selection 8")!,
-        UIColor(named: "Color selection 9")!,
-        UIColor(named: "Color selection 10")!,
-        UIColor(named: "Color selection 11")!,
-        UIColor(named: "Color selection 12")!,
-        UIColor(named: "Color selection 13")!,
-        UIColor(named: "Color selection 14")!,
-        UIColor(named: "Color selection 15")!,
-        UIColor(named: "Color selection 16")!,
-        UIColor(named: "Color selection 17")!,
-        UIColor(named: "Color selection 18")!
-    ]
+    private let colorList: [UIColor] = (1...18).compactMap { UIColor(named: "Color selection \($0)") }
     
     // MARK: - UI Элементы
     private let titleLabel: UILabel = {
@@ -261,7 +242,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
             
             emojiTitleLabel.topAnchor.constraint(equalTo: tableViewContainer.bottomAnchor, constant: 16),
             emojiTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 28),
-
+            
             emojiContainerView.topAnchor.constraint(equalTo: emojiTitleLabel.bottomAnchor, constant: 8),
             emojiContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             emojiContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
@@ -269,7 +250,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
             
             colorTitleLabel.topAnchor.constraint(equalTo: emojiContainerView.bottomAnchor, constant: 16),
             colorTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 28),
-
+            
             colorContainerView.topAnchor.constraint(equalTo: colorTitleLabel.bottomAnchor, constant: 8),
             colorContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             colorContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
@@ -279,7 +260,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
             cancelButton.topAnchor.constraint(equalTo: colorContainerView.bottomAnchor, constant: 16),
             cancelButton.widthAnchor.constraint(equalToConstant: 166),
             cancelButton.heightAnchor.constraint(equalToConstant: 60),
-
+            
             createButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             createButton.topAnchor.constraint(equalTo: colorContainerView.bottomAnchor, constant: 16),
             createButton.widthAnchor.constraint(equalToConstant: 166),
@@ -340,8 +321,20 @@ final class CreateTrackerDetailsViewController: UIViewController {
         let newTracker = Tracker(
             id: UUID(),
             name: nameTextField.text ?? "",
-            emoji: selectedEmojiIndex != nil ? emojiList[selectedEmojiIndex!.item] : "🔥",
-            color: selectedColorIndex != nil ? colorList[selectedColorIndex!.item] : .systemBlue,
+            emoji: {
+                if let index = selectedEmojiIndex?.item, emojiList.indices.contains(index) {
+                    return emojiList[index]
+                } else {
+                    return "🔥"
+                }
+            }(),
+            color: {
+                if let index = selectedColorIndex?.item, colorList.indices.contains(index) {
+                    return colorList[index]
+                } else {
+                    return .systemBlue
+                }
+            }(),
             schedule: trackerType == .habit ? selectedDaysIndices : nil,
             type: trackerType,
             createdDate: Date(),
@@ -400,19 +393,23 @@ extension CreateTrackerDetailsViewController: UICollectionViewDataSource, UIColl
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return collectionView == emojiCollectionView ? emojiList.count : colorList.count
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == emojiCollectionView {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EmojiCell.identifier, for: indexPath) as! EmojiCell
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EmojiCell.identifier, for: indexPath) as? EmojiCell else {
+                return UICollectionViewCell()
+            }
             cell.configure(with: emojiList[indexPath.item], isSelected: selectedEmojiIndex == indexPath)
             return cell
         } else {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorCell.identifier, for: indexPath) as! ColorCell
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorCell.identifier, for: indexPath) as? ColorCell else {
+                return UICollectionViewCell()
+            }
             cell.configure(with: colorList[indexPath.item], isSelected: selectedColorIndex == indexPath)
             return cell
         }
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView == emojiCollectionView {
             selectedEmojiIndex = indexPath
