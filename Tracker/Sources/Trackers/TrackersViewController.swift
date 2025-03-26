@@ -22,6 +22,7 @@ final class TrackersViewController: UIViewController {
     private var trackers: [TrackerCategory] = []
     private let trackerStore = TrackerStore()
     private let categoryStore = TrackerCategoryStore()
+    private let recordStore = TrackerRecordStore()
     
     private var filteredTrackers: [(category: String, items: [Tracker])] = []
     
@@ -176,6 +177,8 @@ final class TrackersViewController: UIViewController {
             trackers = categoriesCD.compactMap { categoryStore.makeCategory(from: $0) }
         }
         updateTrackersForSelectedDate()
+        let allRecords = recordStore.fetchAllRecords()
+        completedTrackers = Set(allRecords.compactMap { recordStore.makeRecord(from: $0) })
     }
     
     // MARK: - Actions
@@ -274,11 +277,15 @@ final class TrackersViewController: UIViewController {
     private func toggleCompletion(for tracker: Tracker, at indexPath: IndexPath) {
         let day = Calendar.current.startOfDay(for: currentDate)
         let record = TrackerRecord(trackerID: tracker.id, date: day)
+        
         if completedTrackers.contains(record) {
             completedTrackers.remove(record)
+            recordStore.deleteRecord(trackerID: tracker.id, date: day)
         } else {
             completedTrackers.insert(record)
+            recordStore.createRecord(trackerID: tracker.id, date: day)
         }
+        
         collectionView.reloadItems(at: [indexPath])
     }
 }
@@ -303,6 +310,7 @@ extension TrackersViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCell.identifier, for: indexPath) as? TrackerCell else {
+            assertionFailure("Unable to dequeue TrackerCell")
             return UICollectionViewCell()
         }
         let tracker = filteredTrackers[indexPath.section].items[indexPath.item]
