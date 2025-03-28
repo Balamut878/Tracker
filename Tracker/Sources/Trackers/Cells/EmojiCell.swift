@@ -25,10 +25,10 @@ final class EmojiCell: UICollectionViewCell {
         contentView.layer.borderWidth = 2
         contentView.layer.borderColor = UIColor.clear.cgColor
         NSLayoutConstraint.activate([
-            emojiLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            emojiLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            emojiLabel.widthAnchor.constraint(equalToConstant: 32),
-            emojiLabel.heightAnchor.constraint(equalToConstant: 38)
+            emojiLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
+            emojiLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            emojiLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            emojiLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
         ])
     }
 
