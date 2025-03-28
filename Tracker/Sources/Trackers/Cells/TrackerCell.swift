@@ -53,16 +53,20 @@ final class TrackerCell: UICollectionViewCell {
     }()
     
     // MARK: - Кнопка «+»
+    // Используем .custom, чтобы иконка не красилась в системный tintColor
     let completeButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("", for: .normal)
-        button.tintColor = .white
+        let button = UIButton(type: .custom)
+        button.setTitle(nil, for: .normal)
+        button.titleLabel?.isHidden = true
+        button.imageView?.contentMode = .scaleAspectFit
+        button.backgroundColor = .clear
         button.layer.cornerRadius = 17
+        button.layer.masksToBounds = true
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
-    // MARK: - Коллбэк, который будет вызываться при нажатии на кнопку «+»
+    // MARK: - Коллбэк, вызываемый по нажатию кнопки
     var didTapComplete: (() -> Void)?
     
     // MARK: - Инициализация
@@ -76,40 +80,52 @@ final class TrackerCell: UICollectionViewCell {
         didTapComplete?()
     }
     
-    // MARK: - Верстка внутренних элементов
+    // MARK: - Верстка
     private func setupUI() {
         contentView.addSubview(eventBackgroundView)
         eventBackgroundView.addSubview(emojiLabel)
         eventBackgroundView.addSubview(titleLabel)
         contentView.addSubview(counterLabel)
         contentView.addSubview(completeButton)
+        
         NSLayoutConstraint.activate([
             eventBackgroundView.topAnchor.constraint(equalTo: contentView.topAnchor),
             eventBackgroundView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             eventBackgroundView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             eventBackgroundView.heightAnchor.constraint(equalToConstant: 90),
+            
             emojiLabel.widthAnchor.constraint(equalToConstant: 24),
             emojiLabel.heightAnchor.constraint(equalToConstant: 24),
             emojiLabel.topAnchor.constraint(equalTo: eventBackgroundView.topAnchor, constant: 12),
             emojiLabel.leadingAnchor.constraint(equalTo: eventBackgroundView.leadingAnchor, constant: 12),
+            
             titleLabel.leadingAnchor.constraint(equalTo: eventBackgroundView.leadingAnchor, constant: 8),
             titleLabel.trailingAnchor.constraint(equalTo: eventBackgroundView.trailingAnchor, constant: -8),
             titleLabel.bottomAnchor.constraint(equalTo: eventBackgroundView.bottomAnchor, constant: -8),
+            
             counterLabel.topAnchor.constraint(equalTo: eventBackgroundView.bottomAnchor, constant: 8),
             counterLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
+            
             completeButton.topAnchor.constraint(equalTo: eventBackgroundView.bottomAnchor, constant: 8),
             completeButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
             completeButton.widthAnchor.constraint(equalToConstant: 34),
             completeButton.heightAnchor.constraint(equalToConstant: 34),
             completeButton.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -8),
+            
             counterLabel.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -8)
         ])
     }
     
+    // MARK: - Конфигурация ячейки
     func configure(with tracker: Tracker, isCompleted: Bool, count: Int) {
+        // Заливаем фон ячейки
         eventBackgroundView.backgroundColor = tracker.color
+        
+        // Заполняем эмодзи и заголовок
         emojiLabel.text = tracker.emoji
         titleLabel.text = tracker.name
+        
+        // Формируем правильное «день / дня / дней»
         let dayString: String
         switch count % 10 {
         case 1 where count % 100 != 11:
@@ -120,9 +136,18 @@ final class TrackerCell: UICollectionViewCell {
             dayString = "дней"
         }
         counterLabel.text = "\(count) \(dayString)"
-        let symbolName = isCompleted ? "checkmark" : "plus"
-        let icon = UIImage(systemName: symbolName)
-        completeButton.setImage(icon, for: .normal)
+        
+        // Подставляем нужную иконку — галочка или плюс
+        let imageName = isCompleted ? "iconCheckmark" : "iconPlus"
+        if let icon = UIImage(named: imageName)?.withRenderingMode(.alwaysTemplate) {
+            completeButton.setImage(icon, for: .normal)
+            // Делаем её белой
+            completeButton.tintColor = .white
+        } else {
+            completeButton.setImage(nil, for: .normal)
+        }
+        
+        // Красим фон кнопки в цвет трекера, чтобы получился круг
         completeButton.backgroundColor = tracker.color
     }
     
