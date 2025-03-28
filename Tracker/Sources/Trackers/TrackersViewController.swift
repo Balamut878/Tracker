@@ -38,7 +38,7 @@ final class TrackersViewController: UIViewController {
         let label = UILabel()
         label.text = "Что будем отслеживать?"
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .gray
+        label.textColor = UIColor(named: "Black[day]")
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(label)
@@ -63,7 +63,7 @@ final class TrackersViewController: UIViewController {
     
     private let plusButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "plus"), for: .normal)
+        button.setImage(UIImage(named: "iconPlus"), for: .normal)
         button.tintColor = .black
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -184,7 +184,8 @@ final class TrackersViewController: UIViewController {
     // MARK: - Actions
     @objc private func addTrackerTapped() {
         let createTrackerVC = CreateTrackerViewController()
-        createTrackerVC.modalPresentationStyle = .pageSheet
+        let navController = UINavigationController(rootViewController: createTrackerVC)
+        navController.modalPresentationStyle = .pageSheet
         
         createTrackerVC.onCreateTracker = { [weak self] newTracker in
             guard let self = self else { return }
@@ -202,7 +203,7 @@ final class TrackersViewController: UIViewController {
             }
         }
         
-        present(createTrackerVC, animated: true)
+        present(navController, animated: true)
         print("Кнопка «+» нажата")
     }
     

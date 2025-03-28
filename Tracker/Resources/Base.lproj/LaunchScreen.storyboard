@@ -13,12 +13,12 @@
         <scene sceneID="EHf-IW-A2E">
             <objects>
                 <viewController id="01J-lp-oVM" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" ambiguous="YES" id="Ze5-6b-2t3">
+                    <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Logo" translatesAutoresizingMaskIntoConstraints="NO" id="FkP-Dn-Fqg">
-                                <rect key="frame" x="158" y="418" width="91" height="94"/>
+                                <rect key="frame" x="151" y="391.66666666666669" width="91" height="94"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="94" id="wsv-u3-2bt"/>
                                     <constraint firstAttribute="width" constant="91" id="yOF-NV-OSJ"/>
@@ -28,10 +28,8 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="Blue"/>
                         <constraints>
-                            <constraint firstItem="FkP-Dn-Fqg" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="topMargin" constant="359" id="Qbk-jR-5qG"/>
-                            <constraint firstItem="FkP-Dn-Fqg" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leadingMargin" constant="142" id="eOQ-Il-DSd"/>
-                            <constraint firstAttribute="bottomMargin" secondItem="FkP-Dn-Fqg" secondAttribute="bottom" constant="359" id="kmZ-QQ-Pch"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="FkP-Dn-Fqg" secondAttribute="trailing" constant="142" id="qdg-5T-DQJ"/>
+                            <constraint firstItem="FkP-Dn-Fqg" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="h2B-BS-sIS"/>
+                            <constraint firstItem="FkP-Dn-Fqg" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="h4Q-Gv-DWC"/>
                         </constraints>
                     </view>
                 </viewController>

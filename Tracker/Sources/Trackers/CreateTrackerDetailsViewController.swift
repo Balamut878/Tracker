@@ -137,22 +137,22 @@ final class CreateTrackerDetailsViewController: UIViewController {
     // MARK: - Кнопки "Отменить" и "Создать"
     private let cancelButton: UIButton = {
         let button = UIButton(type: .system)
+        let redColor = UIColor(named: "Red")!
         button.setTitle("Отменить", for: .normal)
-        button.setTitleColor(.red, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
-        button.layer.borderColor = UIColor.red.cgColor
+        button.setTitleColor(redColor, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.layer.borderColor = redColor.cgColor
         button.layer.borderWidth = 1
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-    
     private let createButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Создать", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
-        button.backgroundColor = .systemGray
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.setTitleColor(UIColor(named: "White[day]"), for: .normal)
+        button.backgroundColor = UIColor(named: "Gray")
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -341,7 +341,11 @@ final class CreateTrackerDetailsViewController: UIViewController {
             completedDates: []
         )
         onCreateTracker?(newTracker)
-        dismiss(animated: true)
+        if let presentingVC = self.presentingViewController?.presentingViewController {
+            presentingVC.dismiss(animated: true)
+        } else {
+            dismiss(animated: true)
+        }
     }
 }
 

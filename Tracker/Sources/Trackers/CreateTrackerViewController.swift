@@ -14,19 +14,13 @@ final class CreateTrackerViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        let textAttributes = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16, weight: .medium)]
+        navigationController?.navigationBar.titleTextAttributes = textAttributes
+        title = "Создание трекера"
+        navigationController?.navigationBar.prefersLargeTitles = false
         
         setupUI()
     }
-    
-    // MARK: - UI Элементы
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Создание трекера"
-        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        label.textColor = .black
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
     
     private let habitButton: UIButton = {
         let button = UIButton(type: .system)
@@ -51,7 +45,6 @@ final class CreateTrackerViewController: UIViewController {
     }()
     
     private func setupUI() {
-        view.addSubview(titleLabel)
         view.addSubview(habitButton)
         view.addSubview(eventButton)
         
@@ -63,13 +56,7 @@ final class CreateTrackerViewController: UIViewController {
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 78),
-            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 114),
-            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -112),
-            titleLabel.widthAnchor.constraint(equalToConstant: 149),
-            titleLabel.heightAnchor.constraint(equalToConstant: 22),
-            titleLabel.bottomAnchor.constraint(equalTo: habitButton.topAnchor, constant: -295),
-            habitButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 395),
+            habitButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 281),
             habitButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             habitButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             habitButton.widthAnchor.constraint(equalToConstant: 335),
