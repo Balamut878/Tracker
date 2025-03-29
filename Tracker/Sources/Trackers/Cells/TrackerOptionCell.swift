@@ -15,17 +15,16 @@ final class TrackerOptionCell: UITableViewCell {
     private let optionLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 17)
-        label.textColor = .black
+        label.textColor = UIColor(named: "Black[day]")
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
     // MARK: - Выбранное значение
-    private let valueLabel: UILabel = {
+    private let valueSubtitleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 17)
         label.textColor = .gray
-        label.textAlignment = .right
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -34,7 +33,7 @@ final class TrackerOptionCell: UITableViewCell {
     private let arrowImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(systemName: "chevron.right")
-        imageView.tintColor = .gray
+        imageView.tintColor = UIColor(named: "Gray")
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
@@ -58,16 +57,17 @@ final class TrackerOptionCell: UITableViewCell {
     
     private func setupUI() {
         contentView.addSubview(optionLabel)
-        contentView.addSubview(valueLabel)
+        contentView.addSubview(valueSubtitleLabel)
         contentView.addSubview(arrowImageView)
         contentView.addSubview(separatorView)
         
         NSLayoutConstraint.activate([
             optionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            optionLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            optionLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 15),
             
-            valueLabel.trailingAnchor.constraint(equalTo: arrowImageView.leadingAnchor, constant: -8),
-            valueLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            valueSubtitleLabel.leadingAnchor.constraint(equalTo: optionLabel.leadingAnchor),
+            valueSubtitleLabel.topAnchor.constraint(equalTo: optionLabel.bottomAnchor, constant: 2),
+            valueSubtitleLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -14),
             
             arrowImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             arrowImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
@@ -81,7 +81,14 @@ final class TrackerOptionCell: UITableViewCell {
     
     func configure(with title: String, value: String?, isLastCell: Bool) {
         optionLabel.text = title
-        valueLabel.text = value ?? ""
+
+        valueSubtitleLabel.isHidden = value == nil || value?.isEmpty == true
+        if let value = value, !value.isEmpty {
+            valueSubtitleLabel.text = value
+        } else {
+            valueSubtitleLabel.text = ""
+        }
+
         separatorView.isHidden = isLastCell
     }
 }

@@ -151,7 +151,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
         let button = UIButton(type: .system)
         button.setTitle("Создать", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        button.setTitleColor(UIColor(named: "White[day]"), for: .normal)
+        button.setTitleColor(UIColor(named: "White[day]")?.withAlphaComponent(1.0), for: .normal)
         button.backgroundColor = UIColor(named: "Gray")
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -194,6 +194,8 @@ final class CreateTrackerDetailsViewController: UIViewController {
         
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         createButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
+        nameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        updateCreateButtonState()
     }
     
     // MARK: - Настройка UI
@@ -318,6 +320,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
     }
     
     @objc private func createButtonTapped() {
+        guard createButton.isEnabled else { return }
         let newTracker = Tracker(
             id: UUID(),
             name: nameTextField.text ?? "",
@@ -354,6 +357,24 @@ extension CreateTrackerDetailsViewController: UITableViewDataSource, UITableView
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return options.count
+    }
+    
+    private func updateCreateButtonState() {
+        let hasText = !(nameTextField.text ?? "").isEmpty
+        let hasEmoji = selectedEmojiIndex != nil
+        let hasColor = selectedColorIndex != nil
+        let isEnabled = hasText && hasEmoji && hasColor
+
+        createButton.isEnabled = isEnabled
+        createButton.backgroundColor = isEnabled ? UIColor(named: "Black[day]") : UIColor(named: "Gray")
+        createButton.setTitleColor(
+            UIColor(named: "White[day]"),
+            for: .normal
+        )
+    }
+    
+    @objc private func textFieldDidChange() {
+        updateCreateButtonState()
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -421,5 +442,6 @@ extension CreateTrackerDetailsViewController: UICollectionViewDataSource, UIColl
             selectedColorIndex = indexPath
         }
         collectionView.reloadData()
+        updateCreateButtonState()
     }
 }
