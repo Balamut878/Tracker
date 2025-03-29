@@ -10,6 +10,7 @@ import UIKit
 final class CreateTrackerViewController: UIViewController {
     
     var onCreateTracker: ((Tracker) -> Void)?
+    private var stackView: UIStackView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,8 +46,12 @@ final class CreateTrackerViewController: UIViewController {
     }()
     
     private func setupUI() {
-        view.addSubview(habitButton)
-        view.addSubview(eventButton)
+        let stackView = UIStackView(arrangedSubviews: [habitButton, eventButton])
+        stackView.axis = .vertical
+        stackView.spacing = 16
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(stackView)
+        self.stackView = stackView
         
         habitButton.addTarget(self, action: #selector(habitButtonTapped), for: .touchUpInside)
         eventButton.addTarget(self, action: #selector(eventButtonTapped), for: .touchUpInside)
@@ -56,15 +61,10 @@ final class CreateTrackerViewController: UIViewController {
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            habitButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 281),
-            habitButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            habitButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            habitButton.widthAnchor.constraint(equalToConstant: 335),
+            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             habitButton.heightAnchor.constraint(equalToConstant: 60),
-            eventButton.topAnchor.constraint(equalTo: habitButton.bottomAnchor, constant: 16),
-            eventButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            eventButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            eventButton.widthAnchor.constraint(equalToConstant: 335),
             eventButton.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
