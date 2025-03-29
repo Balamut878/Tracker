@@ -25,6 +25,8 @@ final class CreateTrackerDetailsViewController: UIViewController {
     
     private let colorList: [UIColor] = (1...18).compactMap { UIColor(named: "Color selection \($0)") }
     
+    private let maxNameLength = 38
+    
     // MARK: - UI Элементы
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -45,8 +47,21 @@ final class CreateTrackerDetailsViewController: UIViewController {
         textField.layer.masksToBounds = true
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 44))
         textField.leftViewMode = .always
+        textField.clearButtonMode = .whileEditing
+        
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
+    }()
+    
+    private let errorLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textColor = UIColor(named: "Red")
+        label.font = UIFont.systemFont(ofSize: 17)
+        label.isHidden = true
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
     
     private let tableViewContainer: UIView = {
@@ -190,11 +205,15 @@ final class CreateTrackerDetailsViewController: UIViewController {
         setupEmojiCollectionView()
         setupColorCollectionView()
         
+        nameTextField.delegate = self
+        
         tableViewContainerHeightConstraint.constant = trackerType == .habit ? 150 : 75
         
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         createButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
+        
         nameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        
         updateCreateButtonState()
     }
     
@@ -218,6 +237,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
         
         contentView.addSubview(titleLabel)
         contentView.addSubview(nameTextField)
+        contentView.addSubview(errorLabel)
         contentView.addSubview(tableViewContainer)
         tableViewContainer.addSubview(tableView)
         contentView.addSubview(emojiTitleLabel)
@@ -238,7 +258,11 @@ final class CreateTrackerDetailsViewController: UIViewController {
             nameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             nameTextField.heightAnchor.constraint(equalToConstant: 75),
             
-            tableViewContainer.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 16),
+            errorLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 8),
+            errorLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            errorLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            
+            tableViewContainer.topAnchor.constraint(equalTo: errorLabel.bottomAnchor, constant: 16),
             tableViewContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             tableViewContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             
@@ -360,11 +384,12 @@ extension CreateTrackerDetailsViewController: UITableViewDataSource, UITableView
     }
     
     private func updateCreateButtonState() {
-        let hasText = !(nameTextField.text ?? "").isEmpty
+        let textCount = nameTextField.text?.count ?? 0
+        let withinLimit = textCount > 0 && textCount <= maxNameLength
         let hasEmoji = selectedEmojiIndex != nil
         let hasColor = selectedColorIndex != nil
-        let isEnabled = hasText && hasEmoji && hasColor
-
+        
+        let isEnabled = withinLimit && hasEmoji && hasColor
         createButton.isEnabled = isEnabled
         createButton.backgroundColor = isEnabled ? UIColor(named: "Black[day]") : UIColor(named: "Gray")
         createButton.setTitleColor(
@@ -374,6 +399,15 @@ extension CreateTrackerDetailsViewController: UITableViewDataSource, UITableView
     }
     
     @objc private func textFieldDidChange() {
+        let textCount = nameTextField.text?.count ?? 0
+        
+        if textCount > maxNameLength {
+            errorLabel.text = "Ограничение \(maxNameLength) символов"
+            errorLabel.isHidden = false
+        } else {
+            errorLabel.isHidden = true
+        }
+        
         updateCreateButtonState()
     }
     
@@ -443,5 +477,19 @@ extension CreateTrackerDetailsViewController: UICollectionViewDataSource, UIColl
         }
         collectionView.reloadData()
         updateCreateButtonState()
+    }
+}
+
+// MARK: - UITextFieldDelegate // NEW
+extension CreateTrackerDetailsViewController: UITextFieldDelegate {
+    func textField(_ textField: UITextField,
+                   shouldChangeCharactersIn range: NSRange,
+                   replacementString string: String) -> Bool
+    {
+        let currentText = textField.text ?? ""
+        guard let stringRange = Range(range, in: currentText) else { return false }
+        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+        
+        return updatedText.count <= maxNameLength + 1
     }
 }

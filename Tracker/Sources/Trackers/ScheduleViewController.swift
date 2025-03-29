@@ -76,46 +76,46 @@ final class ScheduleViewController: UIViewController {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)
-
+        
         let contentView = UIView()
         contentView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(contentView)
-
+        
         scrollView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
         scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-
+        
         contentView.topAnchor.constraint(equalTo: scrollView.topAnchor).isActive = true
         contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor).isActive = true
         contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor).isActive = true
         contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor).isActive = true
         contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor).isActive = true
-
+        
         contentView.addSubview(titleLabel)
         contentView.addSubview(tableViewContainer)
-        contentView.addSubview(doneButton) // Изменено
+        contentView.addSubview(doneButton)
         tableViewContainer.addSubview(tableView)
-
+        
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.topAnchor, constant: 20),
             titleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-
+            
             tableViewContainer.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
             tableViewContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             tableViewContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             tableViewContainer.heightAnchor.constraint(equalToConstant: CGFloat(daysFull.count) * 75),
-
+            
             tableView.topAnchor.constraint(equalTo: tableViewContainer.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: tableViewContainer.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: tableViewContainer.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: tableViewContainer.bottomAnchor),
-
-            doneButton.topAnchor.constraint(equalTo: tableViewContainer.bottomAnchor, constant: 47), // Изменено
-            doneButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20), // Изменено
-            doneButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20), // Изменено
-            doneButton.heightAnchor.constraint(equalToConstant: 60), // Изменено
-            doneButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20) // Изменено
+            
+            doneButton.topAnchor.constraint(equalTo: tableViewContainer.bottomAnchor, constant: 47),
+            doneButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            doneButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            doneButton.heightAnchor.constraint(equalToConstant: 60),
+            doneButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
         ])
     }
     
@@ -140,20 +140,16 @@ final class ScheduleViewController: UIViewController {
     }
     
     private func formatSelectedDays() -> String {
-        // Допустим, 0..4 (Пн..Пт) — будни
         let weekdaysSet: Set<Int> = [0,1,2,3,4]
         
-        // Если выбран ровно набор [Пн..Пт]:
         if selectedDays == weekdaysSet {
             return "Будние дни"
         }
         
-        // Если выбраны все 7 дней:
         if selectedDays.count == 7 {
             return "Каждый день"
         }
         
-        // Иначе — короткие названия
         return selectedDays
             .sorted()
             .map { daysShort[$0] }

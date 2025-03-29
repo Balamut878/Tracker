@@ -22,9 +22,6 @@ final class TrackerHeaderView: UICollectionReusableView {
         return label
     }()
     
-    private var leadingInset: CGFloat = 28
-    private var trailingInset: CGFloat = 198
-    
     // MARK: - Инициализация
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -42,8 +39,6 @@ final class TrackerHeaderView: UICollectionReusableView {
     
     func configure(title: String, leadingInset: CGFloat, trailingInset: CGFloat) {
         titleLabel.text = title
-        self.leadingInset = leadingInset
-        self.trailingInset = trailingInset
         NSLayoutConstraint.deactivate(titleLabel.constraints)
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: leadingInset),

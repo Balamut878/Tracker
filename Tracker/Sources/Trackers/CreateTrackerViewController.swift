@@ -74,9 +74,8 @@ final class CreateTrackerViewController: UIViewController {
         detailsVC.modalPresentationStyle = .pageSheet
         
         detailsVC.onCreateTracker = { [weak self] newTracker in
-            guard let self = self else { return }
-            self.onCreateTracker?(newTracker)
-            self.dismiss(animated: true)
+            self?.onCreateTracker?(newTracker)
+            self?.dismiss(animated: true)
         }
         
         present(detailsVC, animated: true, completion: nil)
@@ -88,9 +87,8 @@ final class CreateTrackerViewController: UIViewController {
         detailsVC.modalPresentationStyle = .pageSheet
         
         detailsVC.onCreateTracker = { [weak self] newTracker in
-            guard let self = self else { return }
-            self.onCreateTracker?(newTracker)
-            self.dismiss(animated: true)
+            self?.onCreateTracker?(newTracker)
+            self?.dismiss(animated: true)
         }
         
         present(detailsVC, animated: true, completion: nil)

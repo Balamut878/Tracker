@@ -7,15 +7,11 @@
 
 import UIKit
 
-/// Главный экран, который показывает список трекеров в коллекции
 final class TrackersViewController: UIViewController {
     
-    /// Сет завершённых трекеров, чтобы быстро проверять «закончен / не закончен»
     private var completedTrackers: Set<TrackerRecord> = []
     
     // MARK: - Properties
-    
-    /// Текущая выбранная дата (по умолчанию – сегодня). При изменении обновляем трекеры
     private var currentDate: Date = Date() {
         didSet {
             updateDateButtonTitle()
@@ -32,8 +28,6 @@ final class TrackersViewController: UIViewController {
     private var filteredTrackers: [(category: String, items: [Tracker])] = []
     
     // MARK: - UI Elements
-    
-    /// Пустой плейсхолдер, который показывается, если трекеров нет
     private let emptyPlaceholderView: UIView = {
         let container = UIView()
         container.isHidden = true
@@ -62,7 +56,6 @@ final class TrackersViewController: UIViewController {
         return container
     }()
     
-    /// Заголовок экрана "Трекеры"
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -73,7 +66,6 @@ final class TrackersViewController: UIViewController {
         return label
     }()
     
-    /// Кнопка «+» для добавления нового трекера
     private let plusButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(named: "iconPlus"), for: .normal)
@@ -82,7 +74,6 @@ final class TrackersViewController: UIViewController {
         return button
     }()
     
-    /// Кнопка «Дата» – открывает datePicker
     private let dateButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Дата", for: .normal)
@@ -94,7 +85,6 @@ final class TrackersViewController: UIViewController {
         return button
     }()
     
-    /// Поисковая строка
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.placeholder = "Поиск"
@@ -104,30 +94,18 @@ final class TrackersViewController: UIViewController {
         return searchBar
     }()
     
-    /// Коллекция, которая показывает трекеры построчно
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
-        
-        // 1) Вертикальный скролл
         layout.scrollDirection = .vertical
-        // 2) Расстояние между строками
         layout.minimumLineSpacing = 16
-        // 3) Расстояние между карточками в одной строке
         layout.minimumInteritemSpacing = 9
-        
-        // 4) Высота заголовка (секции)
         layout.headerReferenceSize = CGSize(width: UIScreen.main.bounds.width, height: 32)
-        
-        // 5) Отступы секции: сверху 12, слева 16, снизу 16, справа 16
         layout.sectionInset = UIEdgeInsets(top: 12, left: 16, bottom: 16, right: 16)
-        
-        // 6) Отключаем автоматический подбор
         layout.estimatedItemSize = .zero
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .white
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        // С учётом safeArea
         collectionView.contentInsetAdjustmentBehavior = .automatic
         return collectionView
     }()
@@ -415,7 +393,6 @@ extension TrackersViewController: UICollectionViewDataSource {
 
 // MARK: - UICollectionViewDelegateFlowLayout
 extension TrackersViewController: UICollectionViewDelegateFlowLayout {
-    /// Фиксированная высота 148, ширина пересчитывается под 2 колонки (расстояние 9 между карточками, 16 слева/справа)
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -425,13 +402,12 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
         }
         
         let columns: CGFloat = 2
-        
         let totalInsets = flowLayout.sectionInset.left + flowLayout.sectionInset.right
         let totalSpacing = flowLayout.minimumInteritemSpacing * (columns - 1)
         let availableWidth = collectionView.bounds.width - totalInsets - totalSpacing
         
         let cellWidth = floor(availableWidth / columns)
-        let cellHeight: CGFloat = 148 // 90 для карточки + 58 под «+»/галочку
+        let cellHeight: CGFloat = 148
         
         return CGSize(width: cellWidth, height: cellHeight)
     }

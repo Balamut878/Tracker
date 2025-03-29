@@ -81,14 +81,14 @@ final class TrackerOptionCell: UITableViewCell {
     
     func configure(with title: String, value: String?, isLastCell: Bool) {
         optionLabel.text = title
-
+        
         valueSubtitleLabel.isHidden = value == nil || value?.isEmpty == true
         if let value = value, !value.isEmpty {
             valueSubtitleLabel.text = value
         } else {
             valueSubtitleLabel.text = ""
         }
-
+        
         separatorView.isHidden = isLastCell
     }
 }
