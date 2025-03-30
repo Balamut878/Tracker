@@ -36,6 +36,8 @@ final class TrackersViewController: UIViewController {
         imageView.contentMode = .scaleAspectFit
         imageView.tintColor = .gray
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        imageView.heightAnchor.constraint(equalToConstant: 80).isActive = true
         container.addSubview(imageView)
         
         let label = UILabel()
@@ -61,7 +63,7 @@ final class TrackersViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Трекеры"
         label.font = UIFont.systemFont(ofSize: 34, weight: .bold)
-        label.textColor = .black
+        label.textColor = UIColor(named: "Black[day]")
         label.textAlignment = .left
         return label
     }()
@@ -69,7 +71,7 @@ final class TrackersViewController: UIViewController {
     private let plusButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(named: "iconPlus"), for: .normal)
-        button.tintColor = .black
+        button.tintColor = UIColor(named: "Black[day]")
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -77,9 +79,9 @@ final class TrackersViewController: UIViewController {
     private let dateButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Дата", for: .normal)
-        button.setTitleColor(.black, for: .normal)
+        button.setTitleColor(UIColor(named: "Black[day]"), for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-        button.backgroundColor = .systemGray5
+        button.backgroundColor = UIColor(named: "LightGray")
         button.layer.cornerRadius = 8
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -90,6 +92,7 @@ final class TrackersViewController: UIViewController {
         searchBar.placeholder = "Поиск"
         searchBar.searchBarStyle = .minimal
         searchBar.backgroundImage = UIImage()
+        searchBar.searchTextField.textColor = UIColor(named: "Gray")
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         return searchBar
     }()
@@ -115,7 +118,7 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor(named: "White[day]")
         navigationController?.setNavigationBarHidden(true, animated: false)
         
         setupUI()

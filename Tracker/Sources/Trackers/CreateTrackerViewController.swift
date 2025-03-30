@@ -14,8 +14,11 @@ final class CreateTrackerViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
-        let textAttributes = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16, weight: .medium)]
+        view.backgroundColor = UIColor(named: "White[day]")
+        let textAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 16, weight: .medium),
+            .foregroundColor: UIColor(named: "Black[day]") ?? .black
+        ]
         navigationController?.navigationBar.titleTextAttributes = textAttributes
         title = "Создание трекера"
         navigationController?.navigationBar.prefersLargeTitles = false
@@ -26,9 +29,9 @@ final class CreateTrackerViewController: UIViewController {
     private let habitButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Привычка", for: .normal)
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(UIColor(named: "White[day]") ?? .white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        button.backgroundColor = .black
+        button.backgroundColor = UIColor(named: "Black[day]") ?? .black
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -37,9 +40,9 @@ final class CreateTrackerViewController: UIViewController {
     private let eventButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Нерегулярное событие", for: .normal)
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(UIColor(named: "White[day]") ?? .white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        button.backgroundColor = .black
+        button.backgroundColor = UIColor(named: "Black[day]") ?? .black
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -71,27 +74,29 @@ final class CreateTrackerViewController: UIViewController {
     
     @objc private func habitButtonTapped() {
         let detailsVC = CreateTrackerDetailsViewController(trackerType: .habit)
-        detailsVC.modalPresentationStyle = .pageSheet
+        let navController = UINavigationController(rootViewController: detailsVC)
+        navController.modalPresentationStyle = .pageSheet
         
         detailsVC.onCreateTracker = { [weak self] newTracker in
             self?.onCreateTracker?(newTracker)
             self?.dismiss(animated: true)
         }
         
-        present(detailsVC, animated: true, completion: nil)
+        present(navController, animated: true, completion: nil)
         print("Выбрана Привычка")
     }
     
     @objc private func eventButtonTapped() {
         let detailsVC = CreateTrackerDetailsViewController(trackerType: .irregularEvent)
-        detailsVC.modalPresentationStyle = .pageSheet
+        let navController = UINavigationController(rootViewController: detailsVC)
+        navController.modalPresentationStyle = .pageSheet
         
         detailsVC.onCreateTracker = { [weak self] newTracker in
             self?.onCreateTracker?(newTracker)
             self?.dismiss(animated: true)
         }
         
-        present(detailsVC, animated: true, completion: nil)
+        present(navController, animated: true, completion: nil)
         print("Выбрано Нерегулярное событие")
     }
 }

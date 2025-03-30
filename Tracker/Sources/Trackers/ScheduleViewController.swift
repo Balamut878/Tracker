@@ -24,7 +24,7 @@ final class ScheduleViewController: UIViewController {
         let label = UILabel()
         label.text = "Расписание"
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        label.textColor = .black
+        label.textColor = UIColor(named: "Black[day]")
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -32,7 +32,7 @@ final class ScheduleViewController: UIViewController {
     
     private let tableViewContainer: UIView = {
         let view = UIView()
-        view.backgroundColor = .systemGray6
+        view.backgroundColor = UIColor(named: "Background[day]")
         view.layer.cornerRadius = 16
         view.clipsToBounds = true
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -54,9 +54,9 @@ final class ScheduleViewController: UIViewController {
     private let doneButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Готово", for: .normal)
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(UIColor(named: "White[day]"), for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
-        button.backgroundColor = UIColor.black
+        button.backgroundColor = UIColor(named: "Black[day]")
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -65,7 +65,7 @@ final class ScheduleViewController: UIViewController {
     // MARK: - Жизненный цикл
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor(named: "White[day]")
         setupUI()
         setupTableView()
         setupDoneButton()
@@ -167,14 +167,16 @@ extension ScheduleViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .default, reuseIdentifier: "dayCell")
         cell.textLabel?.text = daysFull[indexPath.row]
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 17)
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        cell.textLabel?.textColor = UIColor(named: "Black[day]")
         cell.selectionStyle = .none
-        cell.backgroundColor = .clear
+        cell.backgroundColor = UIColor(named: "Background[day]")
         
         let switchControl = UISwitch()
         switchControl.isOn = selectedDays.contains(indexPath.row)
         switchControl.tag = indexPath.row
         switchControl.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
+        switchControl.onTintColor = UIColor(named: "Blue")
         cell.accessoryView = switchControl
         
         if indexPath.row == 0 {

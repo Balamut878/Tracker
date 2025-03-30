@@ -12,7 +12,7 @@ final class ColorCell: UICollectionViewCell {
     
     private let colorView: UIView = {
         let view = UIView()
-        view.layer.cornerRadius = 10
+        view.layer.cornerRadius = 8
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -36,7 +36,7 @@ final class ColorCell: UICollectionViewCell {
         colorView.backgroundColor = color
         contentView.layer.borderWidth = isSelected ? 3 : 0
         contentView.layer.borderColor = isSelected ? color.withAlphaComponent(0.6).cgColor : UIColor.clear.cgColor
-        contentView.layer.cornerRadius = 10
+        contentView.layer.cornerRadius = 8
         contentView.clipsToBounds = true
     }
 }

@@ -16,7 +16,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
     private var selectedValues: [String?] = []
     private var selectedDaysIndices: [Int] = []
     
-    private let emojiList = ["😊", "😻", "🌺", "🐶", "❤️", "😱",
+    private let emojiList = ["🙂", "😻", "🌺", "🐶", "❤️", "😱",
                              "😇", "😡", "🥶", "🤔", "🙌", "🍔",
                              "🥦", "🏓", "🥇", "🎸", "🏝", "😪"]
     
@@ -28,21 +28,14 @@ final class CreateTrackerDetailsViewController: UIViewController {
     private let maxNameLength = 38
     
     // MARK: - UI Элементы
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        label.textColor = .black
-        label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
     private let nameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название трекера"
+        textField.attributedPlaceholder = NSAttributedString(
+            string: "Введите название трекера",
+            attributes: [.foregroundColor: UIColor(named: "Gray") ?? .gray]
+        )
         textField.font = UIFont.systemFont(ofSize: 17)
-        textField.backgroundColor = UIColor.systemGray6
+        textField.backgroundColor = UIColor(named: "Background[day]")
         textField.layer.cornerRadius = 16
         textField.layer.masksToBounds = true
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 44))
@@ -66,7 +59,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
     
     private let tableViewContainer: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.systemGray6
+        view.backgroundColor = UIColor(named: "Background[day]")
         view.layer.cornerRadius = 16
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -86,7 +79,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
         let label = UILabel()
         label.text = "Emoji"
         label.font = UIFont.systemFont(ofSize: 19, weight: .bold)
-        label.textColor = .black
+        label.textColor = UIColor(named: "Black[day]")
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -113,7 +106,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
         let label = UILabel()
         label.text = "Цвет"
         label.font = UIFont.systemFont(ofSize: 19, weight: .bold)
-        label.textColor = .black
+        label.textColor = UIColor(named: "Black[day]")
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -152,7 +145,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
     // MARK: - Кнопки "Отменить" и "Создать"
     private let cancelButton: UIButton = {
         let button = UIButton(type: .system)
-        let redColor = UIColor(named: "Red")!
+        let redColor = UIColor(named: "Red") ?? .red
         button.setTitle("Отменить", for: .normal)
         button.setTitleColor(redColor, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -188,14 +181,19 @@ final class CreateTrackerDetailsViewController: UIViewController {
     // MARK: - Жизненный цикл
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor(named: "White[day]")
+        
+        navigationController?.navigationBar.prefersLargeTitles = false
+        navigationItem.title = trackerType == .habit ? "Новая привычка" : "Новое нерегулярное событие"
+        navigationController?.navigationBar.titleTextAttributes = [
+            .foregroundColor: UIColor(named: "Black[day]") ?? .black,
+            .font: UIFont.systemFont(ofSize: 16, weight: .medium)
+        ]
         
         if trackerType == .habit {
-            titleLabel.text = "Новая привычка"
             options = ["Категория", "Расписание"]
             selectedValues = [nil, nil]
         } else {
-            titleLabel.text = "Новое нерегулярное событие"
             options = ["Категория"]
             selectedValues = [nil]
         }
@@ -235,7 +233,6 @@ final class CreateTrackerDetailsViewController: UIViewController {
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
         ])
         
-        contentView.addSubview(titleLabel)
         contentView.addSubview(nameTextField)
         contentView.addSubview(errorLabel)
         contentView.addSubview(tableViewContainer)
@@ -250,10 +247,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
         contentView.addSubview(createButton)
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
-            titleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            
-            nameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 38),
+            nameTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
             nameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             nameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             nameTextField.heightAnchor.constraint(equalToConstant: 75),
@@ -266,10 +260,10 @@ final class CreateTrackerDetailsViewController: UIViewController {
             tableViewContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             tableViewContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             
-            emojiTitleLabel.topAnchor.constraint(equalTo: tableViewContainer.bottomAnchor, constant: 16),
+            emojiTitleLabel.topAnchor.constraint(equalTo: tableViewContainer.bottomAnchor, constant: 32),
             emojiTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 28),
             
-            emojiContainerView.topAnchor.constraint(equalTo: emojiTitleLabel.bottomAnchor, constant: 8),
+            emojiContainerView.topAnchor.constraint(equalTo: emojiTitleLabel.bottomAnchor, constant: 0),
             emojiContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             emojiContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             emojiContainerView.heightAnchor.constraint(equalToConstant: 204),
@@ -277,7 +271,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
             colorTitleLabel.topAnchor.constraint(equalTo: emojiContainerView.bottomAnchor, constant: 16),
             colorTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 28),
             
-            colorContainerView.topAnchor.constraint(equalTo: colorTitleLabel.bottomAnchor, constant: 8),
+            colorContainerView.topAnchor.constraint(equalTo: colorTitleLabel.bottomAnchor, constant: 0),
             colorContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             colorContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             colorContainerView.heightAnchor.constraint(equalToConstant: 204),
@@ -326,6 +320,9 @@ final class CreateTrackerDetailsViewController: UIViewController {
     
     // MARK: - Настройка Emoji CollectionView
     private func setupEmojiCollectionView() {
+        if let layout = emojiCollectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            layout.sectionInset = UIEdgeInsets(top: 24, left: 0, bottom: 0, right: 0)
+        }
         emojiCollectionView.register(EmojiCell.self, forCellWithReuseIdentifier: EmojiCell.identifier)
         emojiCollectionView.dataSource = self
         emojiCollectionView.delegate = self
@@ -336,6 +333,9 @@ final class CreateTrackerDetailsViewController: UIViewController {
         colorCollectionView.register(ColorCell.self, forCellWithReuseIdentifier: ColorCell.identifier)
         colorCollectionView.dataSource = self
         colorCollectionView.delegate = self
+        if let layout = colorCollectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            layout.sectionInset = UIEdgeInsets(top: 24, left: 0, bottom: 0, right: 0)
+        }
     }
     
     // MARK: - Обработчики кнопок

@@ -23,8 +23,8 @@ final class TrackerOptionCell: UITableViewCell {
     // MARK: - Выбранное значение
     private let valueSubtitleLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 17)
-        label.textColor = .gray
+        label.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        label.textColor = UIColor(named: "Gray")
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
