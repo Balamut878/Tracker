@@ -43,7 +43,7 @@ final class TrackerHeaderView: UICollectionReusableView {
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: leadingInset),
             titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -trailingInset),
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 12),
+            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 24),
             titleLabel.heightAnchor.constraint(equalToConstant: 18)
         ])
     }

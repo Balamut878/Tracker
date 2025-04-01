@@ -12,7 +12,7 @@ final class EmojiCell: UICollectionViewCell {
     
     private let emojiLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 19, weight: .bold)
+        label.font = UIFont.systemFont(ofSize: 32)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -26,7 +26,7 @@ final class EmojiCell: UICollectionViewCell {
         contentView.layer.borderColor = UIColor.clear.cgColor
         NSLayoutConstraint.activate([
             emojiLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            emojiLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 7)
+            emojiLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
     }
     

@@ -58,34 +58,6 @@ final class TrackersViewController: UIViewController {
         return container
     }()
     
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Трекеры"
-        label.font = UIFont.systemFont(ofSize: 34, weight: .bold)
-        label.textColor = UIColor(named: "Black[day]")
-        label.textAlignment = .left
-        return label
-    }()
-    
-    private let plusButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(named: "iconPlus"), for: .normal)
-        button.tintColor = UIColor(named: "Black[day]")
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
-    private let dateButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Дата", for: .normal)
-        button.setTitleColor(UIColor(named: "Black[day]"), for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-        button.backgroundColor = UIColor(named: "LightGray")
-        button.layer.cornerRadius = 8
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
     
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
@@ -95,6 +67,16 @@ final class TrackersViewController: UIViewController {
         searchBar.searchTextField.textColor = UIColor(named: "Gray")
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         return searchBar
+    }()
+    
+    private let dateButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitleColor(UIColor(named: "Black[day]"), for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        button.backgroundColor = UIColor(named: "LightGray")
+        button.layer.cornerRadius = 8
+        button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 10, bottom: 6, right: 10)
+        return button
     }()
     
     private let collectionView: UICollectionView = {
@@ -117,52 +99,41 @@ final class TrackersViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         view.backgroundColor = UIColor(named: "White[day]")
-        navigationController?.setNavigationBarHidden(true, animated: false)
         
         setupUI()
+        dateButton.addTarget(self, action: #selector(dateButtonTapped), for: .touchUpInside)
+        setupNavigationBar()
         setupCollectionView()
         loadData()
+        updateDateButtonTitle()
     }
     
-    // MARK: - UI Setup
-    
     private func setupUI() {
+        let titleLabel: UILabel = {
+            let label = UILabel()
+            label.translatesAutoresizingMaskIntoConstraints = false
+            label.text = "Трекеры"
+            label.font = UIFont.systemFont(ofSize: 34, weight: .bold)
+            label.textColor = UIColor(named: "Black[day]")
+            label.textAlignment = .left
+            return label
+        }()
         view.addSubview(titleLabel)
-        view.addSubview(plusButton)
-        view.addSubview(dateButton)
+        
         view.addSubview(searchBar)
         view.addSubview(collectionView)
         view.addSubview(emptyPlaceholderView)
         emptyPlaceholderView.translatesAutoresizingMaskIntoConstraints = false
         
-        plusButton.addTarget(self, action: #selector(addTrackerTapped), for: .touchUpInside)
-        dateButton.addTarget(self, action: #selector(dateButtonTapped), for: .touchUpInside)
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
         
-        updateDateButtonTitle()
-        setupConstraints()
-    }
-    
-    private func setupConstraints() {
-        let safeArea = view.safeAreaLayoutGuide
         
         NSLayoutConstraint.activate([
-            plusButton.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 16),
-            plusButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            plusButton.widthAnchor.constraint(equalToConstant: 42),
-            plusButton.heightAnchor.constraint(equalToConstant: 42),
-            
-            titleLabel.topAnchor.constraint(equalTo: plusButton.bottomAnchor, constant: 1),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: dateButton.leadingAnchor, constant: -8),
-            
-            dateButton.centerYAnchor.constraint(equalTo: plusButton.centerYAnchor),
-            dateButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            dateButton.widthAnchor.constraint(equalToConstant: 77),
-            dateButton.heightAnchor.constraint(equalToConstant: 34),
-            
-            searchBar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
+            searchBar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 7),
             searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             searchBar.heightAnchor.constraint(equalToConstant: 36),
@@ -293,7 +264,8 @@ final class TrackersViewController: UIViewController {
     private func updateDateButtonTitle() {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd.MM.yy"
-        dateButton.setTitle(formatter.string(from: currentDate), for: .normal)
+        let dateString = formatter.string(from: currentDate)
+        dateButton.setTitle(dateString, for: .normal)
     }
     
     private func updateTrackersForSelectedDate() {
@@ -331,6 +303,34 @@ final class TrackersViewController: UIViewController {
         }
         
         collectionView.reloadItems(at: [indexPath])
+    }
+}
+
+// MARK: - Navigation Bar Setup
+extension TrackersViewController {
+    private func setupNavigationBar() {
+        title = ""
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            image: UIImage(named: "iconPlus"),
+            style: .plain,
+            target: self,
+            action: #selector(addTrackerTapped)
+        )
+        navigationItem.leftBarButtonItem?.tintColor = UIColor(named: "Black[day]")
+        
+        let dateWrapperView = UIView(frame: CGRect(x: 0, y: 0, width: 77, height: 34))
+        dateWrapperView.addSubview(dateButton)
+        
+        dateButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            dateButton.topAnchor.constraint(equalTo: dateWrapperView.topAnchor),
+            dateButton.bottomAnchor.constraint(equalTo: dateWrapperView.bottomAnchor),
+            dateButton.leadingAnchor.constraint(equalTo: dateWrapperView.leadingAnchor),
+            dateButton.trailingAnchor.constraint(equalTo: dateWrapperView.trailingAnchor)
+        ])
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: dateWrapperView)
     }
 }
 
