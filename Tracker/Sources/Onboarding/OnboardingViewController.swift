@@ -20,7 +20,6 @@ final class OnboardingViewController: UIViewController {
     
     private var currentIndex = 0
     
-    // Создаем UIPageViewController для перелистывания
     private lazy var pageViewController: UIPageViewController = {
         let vc = UIPageViewController(transitionStyle: .scroll,
                                       navigationOrientation: .horizontal,
@@ -30,9 +29,8 @@ final class OnboardingViewController: UIViewController {
         return vc
     }()
     
-    // Индикатор страниц (точки)
     private let pageControl = UIPageControl()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupPageViewController()
@@ -40,7 +38,6 @@ final class OnboardingViewController: UIViewController {
         setInitialPage()
     }
     
-    // Устанавливаем PageViewController на весь экран
     private func setupPageViewController() {
         addChild(pageViewController)
         view.addSubview(pageViewController.view)
@@ -55,8 +52,7 @@ final class OnboardingViewController: UIViewController {
         
         pageViewController.didMove(toParent: self)
     }
-
-    // Настройка pageControl (точек)
+    
     private func setupPageControl() {
         pageControl.numberOfPages = pages.count
         pageControl.currentPage = 0
@@ -66,22 +62,19 @@ final class OnboardingViewController: UIViewController {
         
         view.addSubview(pageControl)
         
-        // Если нужно подвинуть выше/ниже — меняем значение
         NSLayoutConstraint.activate([
             pageControl.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -168),
             pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
-
-    // Показываем первую страницу
+    
     private func setInitialPage() {
         guard let firstVC = viewControllerAt(index: 0) else { return }
         pageViewController.setViewControllers([firstVC],
                                               direction: .forward,
                                               animated: true)
     }
-
-    // Возвращает контроллер страницы для заданного индекса
+    
     private func viewControllerAt(index: Int) -> UIViewController? {
         guard index >= 0 && index < pages.count else { return nil }
         
@@ -92,13 +85,12 @@ final class OnboardingViewController: UIViewController {
             total: pages.count
         )
         
-        // Если на этой странице есть кнопка "Вот это технологии!"
         if pages[index].showButton {
             pageVC.actionButton.addTarget(self, action: #selector(finishOnboarding), for: .touchUpInside)
         }
         return pageVC
     }
-
+    
     // Завершаем онбординг и показываем основной экран
     @objc private func finishOnboarding() {
         UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
@@ -135,26 +127,23 @@ final class OnboardingViewController: UIViewController {
 // MARK: - UIPageViewControllerDataSource & Delegate
 
 extension OnboardingViewController: UIPageViewControllerDataSource, UIPageViewControllerDelegate {
-    // Листаем назад
+    
     func pageViewController(_ pageViewController: UIPageViewController,
                             viewControllerBefore viewController: UIViewController) -> UIViewController? {
         currentIndex -= 1
         return viewControllerAt(index: currentIndex)
     }
     
-    // Листаем вперёд
     func pageViewController(_ pageViewController: UIPageViewController,
                             viewControllerAfter viewController: UIViewController) -> UIViewController? {
         currentIndex += 1
         return viewControllerAt(index: currentIndex)
     }
-
-    // Когда перелистнули страницу
+    
     func pageViewController(_ pageViewController: UIPageViewController,
                             didFinishAnimating finished: Bool,
                             previousViewControllers: [UIViewController],
                             transitionCompleted completed: Bool) {
-        // Убеждаемся, что анимация завершена
         guard completed,
               let currentVC = pageViewController.viewControllers?.first as? OnboardingPageViewController,
               let index = pages.firstIndex(where: { $0.title == currentVC.titleLabel.text })

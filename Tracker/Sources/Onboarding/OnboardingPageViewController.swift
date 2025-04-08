@@ -48,21 +48,13 @@ final class OnboardingPageViewController: UIViewController {
         actionButton.layer.cornerRadius = 16
         actionButton.contentEdgeInsets = UIEdgeInsets(top: 19, left: 32, bottom: 19, right: 32)
         
-        // Ваш текущий «референс»
         let refHeight: CGFloat = 812.0
         let screenHeight = UIScreen.main.bounds.height
         let scaleFactor = screenHeight / refHeight
-        
-        // Допустим, для маленьких экранов (меньше 667 или 736) делаем минимальные значения:
         var titleTop: CGFloat = 432 * scaleFactor
-       // var titleHeight: CGFloat = 76 * scaleFactor на время!!!
-       
         
-        // Если экран реально маленький — вручную подправляем
-        // (или можно делать проверку screenHeight < 667.0 — для SE 2/8/SE 3)
         if screenHeight <= 667 {
-            titleTop = 300 // фиксируем немного меньше, чтобы на SE было не так низко
-        //    titleHeight = 60 // чуть уменьшим высоту на время!!!
+            titleTop = 300
         }
         
         NSLayoutConstraint.activate([

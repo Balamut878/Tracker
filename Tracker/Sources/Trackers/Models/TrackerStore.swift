@@ -87,7 +87,8 @@ final class TrackerStore: NSObject {
             schedule: schedule,
             type: type,
             createdDate: createdDate,
-            completedDates: []
+            completedDates: [],
+            categoryTitle: cdObject.category?.title ?? "По умолчанию"
         )
     }
     
