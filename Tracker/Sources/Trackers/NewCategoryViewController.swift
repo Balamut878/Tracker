@@ -9,28 +9,29 @@ import UIKit
 
 final class NewCategoryViewController: UIViewController {
     
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Новая категория"
-        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        label.textAlignment = .center
-        return label
-    }()
-    
     private let textField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название категории"
-        textField.backgroundColor = .systemGray6
+        textField.attributedPlaceholder = NSAttributedString(
+            string: "Введите название категории",
+            attributes: [
+                .foregroundColor: UIColor(named: "Gray") ?? .lightGray,
+                .font: UIFont.systemFont(ofSize: 17, weight: .regular)
+            ]
+        )
+        textField.backgroundColor = UIColor(named: "Background[day]")
         textField.layer.cornerRadius = 16
-        textField.textAlignment = .center
+        textField.textAlignment = .left
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
+        textField.leftViewMode = .always
         return textField
     }()
     
     private let doneButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Готово", for: .normal)
-        button.backgroundColor = .lightGray
-        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.setTitleColor(UIColor(named: "White[day]"), for: .normal)
+        button.backgroundColor = UIColor(named: "Gray")
         button.layer.cornerRadius = 16
         button.isEnabled = false
         return button
@@ -38,23 +39,25 @@ final class NewCategoryViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        title = "Новая категория"
+        navigationController?.navigationBar.titleTextAttributes = [
+            .font: UIFont.systemFont(ofSize: 16, weight: .medium),
+            .foregroundColor: UIColor(named: "Black[day]") ?? .black
+        ]
+        view.backgroundColor = UIColor(named: "White[day]")
         setupLayout()
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         doneButton.addTarget(self, action: #selector(doneButtonTapped), for: .touchUpInside)
     }
     
     private func setupLayout() {
-        [titleLabel, textField, doneButton].forEach {
+        [textField, doneButton].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 27),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
-            textField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
+            textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             textField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             textField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             textField.heightAnchor.constraint(equalToConstant: 75),
@@ -69,21 +72,21 @@ final class NewCategoryViewController: UIViewController {
     @objc private func textFieldDidChange() {
         let isTextEmpty = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true
         doneButton.isEnabled = !isTextEmpty
-        doneButton.backgroundColor = isTextEmpty ? .lightGray : .black
+        doneButton.backgroundColor = isTextEmpty ? UIColor(named: "Gray") : UIColor(named: "Black[day]")
     }
     
     @objc private func doneButtonTapped() {
         guard let title = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !title.isEmpty else { return }
-
+        
         let categoryStore = TrackerCategoryStore()
         let createdCategory = categoryStore.createCategory(title: title)
-
+        
         if let newCategory = categoryStore.makeCategory(from: createdCategory) {
             NotificationCenter.default.post(name: NSNotification.Name("didCreateCategory"),
                                             object: newCategory)
         }
-
+        
         dismiss(animated: true)
     }
 }

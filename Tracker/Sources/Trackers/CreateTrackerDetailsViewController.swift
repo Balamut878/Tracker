@@ -445,7 +445,8 @@ extension CreateTrackerDetailsViewController: UITableViewDataSource, UITableView
                     self?.tableView.reloadRows(at: [IndexPath(row: categoryIndex, section: 0)], with: .none)
                 }
             }
-            present(categoryVC, animated: true)
+            let navController = UINavigationController(rootViewController: categoryVC)
+            present(navController, animated: true)
             return
         }
         
@@ -501,7 +502,7 @@ extension CreateTrackerDetailsViewController: UICollectionViewDataSource, UIColl
     }
 }
 
-// MARK: - UITextFieldDelegate // NEW
+// MARK: - UITextFieldDelegate
 extension CreateTrackerDetailsViewController: UITextFieldDelegate {
     func textField(_ textField: UITextField,
                    shouldChangeCharactersIn range: NSRange,
