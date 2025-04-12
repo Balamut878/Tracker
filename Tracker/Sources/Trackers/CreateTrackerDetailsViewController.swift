@@ -27,6 +27,8 @@ final class CreateTrackerDetailsViewController: UIViewController {
     
     private let maxNameLength = 38
     
+    private var selectedCategoryCD: TrackerCategoryCoreData?
+    
     // MARK: - UI Элементы
     private let nameTextField: UITextField = {
         let textField = UITextField()
@@ -365,7 +367,8 @@ final class CreateTrackerDetailsViewController: UIViewController {
             schedule: trackerType == .habit ? selectedDaysIndices : nil,
             type: trackerType,
             createdDate: Date(),
-            completedDates: []
+            completedDates: [],
+            categoryTitle: selectedCategoryCD?.title ?? "По умолчанию"
         )
         onCreateTracker?(newTracker)
         if let presentingVC = self.presentingViewController?.presentingViewController {
@@ -428,6 +431,25 @@ extension CreateTrackerDetailsViewController: UITableViewDataSource, UITableView
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
+        if indexPath.row == 0 {
+            let categoryVC = TrackerCategoryViewController()
+            categoryVC.modalPresentationStyle = .automatic
+            categoryVC.onCategorySelected = { [weak self] category in
+                if let categoryIndex = self?.options.firstIndex(of: "Категория") {
+                    self?.selectedValues[categoryIndex] = category.title
+                    let categoryStore = TrackerCategoryStore()
+                    let allCategories = categoryStore.fetchAllCategories()
+                    if let matchedCategory = allCategories.first(where: { $0.title == category.title }) {
+                        self?.selectedCategoryCD = matchedCategory
+                    }
+                    self?.tableView.reloadRows(at: [IndexPath(row: categoryIndex, section: 0)], with: .none)
+                }
+            }
+            let navController = UINavigationController(rootViewController: categoryVC)
+            present(navController, animated: true)
+            return
+        }
+        
         if trackerType == .habit, indexPath.row == 1 {
             let scheduleVC = ScheduleViewController()
             scheduleVC.delegate = self
@@ -480,7 +502,7 @@ extension CreateTrackerDetailsViewController: UICollectionViewDataSource, UIColl
     }
 }
 
-// MARK: - UITextFieldDelegate // NEW
+// MARK: - UITextFieldDelegate
 extension CreateTrackerDetailsViewController: UITextFieldDelegate {
     func textField(_ textField: UITextField,
                    shouldChangeCharactersIn range: NSRange,

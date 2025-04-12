@@ -170,14 +170,7 @@ final class TrackersViewController: UIViewController {
     private func loadData() {
         let categoriesCD = categoryStore.fetchAllCategories()
         
-        if categoriesCD.isEmpty {
-            let defaultCategoryCD = categoryStore.createCategory(title: "По умолчанию")
-            if let defaultCategory = categoryStore.makeCategory(from: defaultCategoryCD) {
-                trackers = [defaultCategory]
-            }
-        } else {
-            trackers = categoriesCD.compactMap { categoryStore.makeCategory(from: $0) }
-        }
+        trackers = categoriesCD.compactMap { categoryStore.makeCategory(from: $0) }
         
         updateTrackersForSelectedDate()
         
@@ -196,17 +189,17 @@ final class TrackersViewController: UIViewController {
             guard let self = self else { return }
             
             let categoriesCD = self.categoryStore.fetchAllCategories()
-            var defaultCategoryCD: TrackerCategoryCoreData?
-            if let category = categoriesCD.first(where: { $0.title == "По умолчанию" }) {
-                defaultCategoryCD = category
+            
+            if let categoryCD = categoriesCD.first(where: { category in
+                category.title == newTracker.categoryTitle
+            }) {
+                self.trackerStore.createTracker(newTracker, category: categoryCD)
             } else {
-                defaultCategoryCD = self.categoryStore.createCategory(title: "По умолчанию")
+                let defaultCategoryCD = categoriesCD.first(where: { $0.title == "По умолчанию" }) ?? self.categoryStore.createCategory(title: "По умолчанию")
+                self.trackerStore.createTracker(newTracker, category: defaultCategoryCD)
             }
             
-            if let defaultCategoryCD = defaultCategoryCD {
-                self.trackerStore.createTracker(newTracker, category: defaultCategoryCD)
-                self.loadData()
-            }
+            self.loadData()
         }
         
         present(navController, animated: true)

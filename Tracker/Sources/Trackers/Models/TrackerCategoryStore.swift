@@ -8,8 +8,13 @@
 import Foundation
 import CoreData
 
+protocol TrackerCategoryStoreDelegate: AnyObject {
+    func didUpdateCategories(_ categories: [TrackerCategory])
+}
+
 final class TrackerCategoryStore: NSObject {
     private let store = Store.shared
+    weak var delegate: TrackerCategoryStoreDelegate?
     
     // MARK: - Создание новой категории
     func createCategory(title: String) -> TrackerCategoryCoreData {
@@ -17,6 +22,7 @@ final class TrackerCategoryStore: NSObject {
         let category = TrackerCategoryCoreData(context: context)
         category.title = title
         store.saveContext()
+        delegate?.didUpdateCategories(fetchAllCategories().compactMap { makeCategory(from: $0) })
         return category
     }
     
@@ -42,5 +48,9 @@ final class TrackerCategoryStore: NSObject {
         let trackers = trackerCDArray.compactMap { trackerStore.makeTracker(from: $0) }
         
         return TrackerCategory(title: title, trackers: trackers)
+    }
+    
+    func fetchCategories() -> [TrackerCategory] {
+        return fetchAllCategories().compactMap { makeCategory(from: $0) }
     }
 }
