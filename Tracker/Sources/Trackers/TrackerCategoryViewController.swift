@@ -95,7 +95,7 @@ final class TrackerCategoryViewController: UIViewController {
         setupBindings()
         setupTableView()
         
-        viewModel.onCategoriesChanged?(viewModel.trackerCategoryStore.fetchCategories())
+        viewModel.didUpdateCategories?(viewModel.trackerCategoryStore.fetchCategories())
         
         NotificationCenter.default.addObserver(
             self,
@@ -137,7 +137,7 @@ final class TrackerCategoryViewController: UIViewController {
     }
     
     private func setupBindings() {
-        viewModel.onCategoriesChanged = { [weak self] categories in
+        viewModel.didUpdateCategories = { [weak self] categories in
             guard let self = self else { return }
             self.categories = categories
             
@@ -179,14 +179,14 @@ final class TrackerCategoryViewController: UIViewController {
     }
     
     @objc private func handleCategoryCreated(_ notification: Notification) {
-        viewModel.onCategoriesChanged = { [weak self] categories in
+        viewModel.didUpdateCategories = { [weak self] categories in
             guard let self = self else { return }
             self.categories = categories
             self.tableView.reloadData()
             self.tableView.backgroundView = categories.isEmpty ? self.emptyView : nil
             self.updateContainerHeight()
         }
-        viewModel.onCategoriesChanged?(viewModel.trackerCategoryStore.fetchCategories())
+        viewModel.didUpdateCategories?(viewModel.trackerCategoryStore.fetchCategories())
     }
 }
 
@@ -220,6 +220,6 @@ extension TrackerCategoryViewController: UITableViewDelegate {
         tableView.reloadData()
         let selectedCategory = categories[indexPath.row]
         onCategorySelected?(selectedCategory)
-        // dismiss(animated: true)
+        dismiss(animated: true)
     }
 }

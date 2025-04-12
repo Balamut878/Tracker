@@ -433,6 +433,7 @@ extension CreateTrackerDetailsViewController: UITableViewDataSource, UITableView
         
         if indexPath.row == 0 {
             let categoryVC = TrackerCategoryViewController()
+            categoryVC.preselectedCategoryTitle = self.selectedCategoryCD?.title
             categoryVC.modalPresentationStyle = .automatic
             categoryVC.onCategorySelected = { [weak self] category in
                 if let categoryIndex = self?.options.firstIndex(of: "Категория") {

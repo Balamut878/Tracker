@@ -9,7 +9,7 @@ import UIKit
 
 final class OnboardingPageViewController: UIViewController {
     
-    let imageView = UIImageView()
+    private let imageView = UIImageView()
     let titleLabel = UILabel()
     let actionButton = UIButton(type: .system)
     
@@ -25,29 +25,39 @@ final class OnboardingPageViewController: UIViewController {
     }
     
     private func setupLayout() {
-        view.addSubview(imageView)
-        view.addSubview(titleLabel)
-        view.addSubview(actionButton)
+        [imageView, titleLabel, actionButton].forEach { view.addSubview($0) }
         
+        setupImageView()
+        setupTitleLabel()
+        setupActionButton()
+        setupConstraints()
+    }
+    
+    private func setupImageView() {
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        actionButton.translatesAutoresizingMaskIntoConstraints = false
-        
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
-        
+    }
+    
+    private func setupTitleLabel() {
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.textColor = UIColor(named: "Black[day]") ?? .black
         titleLabel.font = UIFont.systemFont(ofSize: 32, weight: .bold)
         titleLabel.numberOfLines = 2
         titleLabel.textAlignment = .center
         titleLabel.lineBreakMode = .byWordWrapping
-        
+    }
+    
+    private func setupActionButton() {
+        actionButton.translatesAutoresizingMaskIntoConstraints = false
         actionButton.setTitle("Вот это технологии!", for: .normal)
         actionButton.backgroundColor = UIColor(named: "Black[day]")
         actionButton.setTitleColor(.whiteDay, for: .normal)
         actionButton.layer.cornerRadius = 16
         actionButton.contentEdgeInsets = UIEdgeInsets(top: 19, left: 32, bottom: 19, right: 32)
-        
+    }
+    
+    private func setupConstraints() {
         let refHeight: CGFloat = 812.0
         let screenHeight = UIScreen.main.bounds.height
         let scaleFactor = screenHeight / refHeight
@@ -65,7 +75,7 @@ final class OnboardingPageViewController: UIViewController {
             
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: titleTop),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor,constant: 16),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
             actionButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -84),

@@ -7,6 +7,10 @@
 
 import UIKit
 
+extension Notification.Name {
+    static let didCreateCategory = Notification.Name("didCreateCategory")
+}
+
 final class NewCategoryViewController: UIViewController {
     
     private let textField: UITextField = {
@@ -83,7 +87,7 @@ final class NewCategoryViewController: UIViewController {
         let createdCategory = categoryStore.createCategory(title: title)
         
         if let newCategory = categoryStore.makeCategory(from: createdCategory) {
-            NotificationCenter.default.post(name: NSNotification.Name("didCreateCategory"),
+            NotificationCenter.default.post(name: .didCreateCategory,
                                             object: newCategory)
         }
         

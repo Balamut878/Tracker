@@ -5,6 +5,10 @@
 //  Created by Александр Дудченко on 23.02.2025.
 //
 
+private enum UserDefaultsKeys {
+    static let hasSeenOnboarding = "hasSeenOnboarding"
+}
+
 import UIKit
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -21,7 +25,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let newWindow = UIWindow(windowScene: windowScene)
         
         let rootViewController: UIViewController
-        if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+        if UserDefaults.standard.bool(forKey: UserDefaultsKeys.hasSeenOnboarding) {
             // Показываем главный экран
             let tabBarController = UITabBarController()
             tabBarController.tabBar.layer.borderColor = UIColor.lightGray.cgColor
