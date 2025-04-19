@@ -9,6 +9,9 @@ import UIKit
 
 final class TrackerCell: UICollectionViewCell {
     
+    // MARK: - Модель трекера (для контекстного меню)
+    var tracker: Tracker?
+    
     static let identifier = "TrackerCell"
     
     // MARK: - Вью с цветным фоном
@@ -43,6 +46,15 @@ final class TrackerCell: UICollectionViewCell {
         return label
     }()
     
+    // MARK: - Значок «прикреплено»
+    private let pinImageView: UIImageView = {
+        let iv = UIImageView()
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        iv.contentMode = .center
+        iv.tintColor = .white
+        return iv
+    }()
+    
     // MARK: - Счётчик дней
     private let counterLabel: UILabel = {
         let label = UILabel()
@@ -72,6 +84,8 @@ final class TrackerCell: UICollectionViewCell {
         super.init(frame: frame)
         setupUI()
         completeButton.addTarget(self, action: #selector(completeTapped), for: .touchUpInside)
+        let interaction = UIContextMenuInteraction(delegate: self)
+        eventBackgroundView.addInteraction(interaction)
     }
     
     required init?(coder: NSCoder) {
@@ -87,6 +101,7 @@ final class TrackerCell: UICollectionViewCell {
         contentView.addSubview(eventBackgroundView)
         eventBackgroundView.addSubview(emojiLabel)
         eventBackgroundView.addSubview(titleLabel)
+        eventBackgroundView.addSubview(pinImageView)
         contentView.addSubview(counterLabel)
         contentView.addSubview(completeButton)
         
@@ -104,6 +119,11 @@ final class TrackerCell: UICollectionViewCell {
             titleLabel.leadingAnchor.constraint(equalTo: eventBackgroundView.leadingAnchor, constant: 12),
             titleLabel.trailingAnchor.constraint(equalTo: eventBackgroundView.trailingAnchor, constant: -12),
             titleLabel.bottomAnchor.constraint(equalTo: eventBackgroundView.bottomAnchor, constant: -12),
+            
+            pinImageView.topAnchor.constraint(equalTo: eventBackgroundView.topAnchor, constant: 6),
+            pinImageView.trailingAnchor.constraint(equalTo: eventBackgroundView.trailingAnchor, constant: -8),
+            pinImageView.widthAnchor.constraint(equalToConstant: 24),
+            pinImageView.heightAnchor.constraint(equalToConstant: 24),
             
             counterLabel.topAnchor.constraint(equalTo: eventBackgroundView.bottomAnchor, constant: 16),
             counterLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
@@ -123,6 +143,11 @@ final class TrackerCell: UICollectionViewCell {
     
     // MARK: - Заполнение ячейки
     func configure(with tracker: Tracker, isCompleted: Bool, count: Int) {
+        self.tracker = tracker
+        
+        pinImageView.image = UIImage(named: "iconPin")?.withRenderingMode(.alwaysTemplate)
+        pinImageView.isHidden = !tracker.isPinned
+        
         eventBackgroundView.backgroundColor = tracker.color
         emojiLabel.text = tracker.emoji
         titleLabel.text = tracker.name
@@ -157,6 +182,28 @@ final class TrackerCell: UICollectionViewCell {
                 imageView.centerXAnchor.constraint(equalTo: completeButton.centerXAnchor),
                 imageView.centerYAnchor.constraint(equalTo: completeButton.centerYAnchor)
             ])
+        }
+    }
+}
+
+extension TrackerCell: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        guard let tracker = tracker else { return nil }
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            let pinAction = UIAction(title: tracker.isPinned ? "Открепить" : "Закрепить", image: nil) { _ in
+                NotificationCenter.default.post(name: Notification.Name("PinTracker"), object: nil, userInfo: ["tracker": tracker])
+            }
+            
+            let editAction = UIAction(title: "Редактировать", image: nil) { _ in
+                NotificationCenter.default.post(name: Notification.Name("EditTracker"), object: nil, userInfo: ["tracker": tracker])
+            }
+            
+            let deleteAction = UIAction(title: "Удалить", image: nil, attributes: .destructive) { _ in
+                NotificationCenter.default.post(name: Notification.Name("DeleteTrackerConfirmed"), object: nil, userInfo: ["tracker": tracker])
+            }
+            
+            return UIMenu(children: [pinAction, editAction, deleteAction])
         }
     }
 }

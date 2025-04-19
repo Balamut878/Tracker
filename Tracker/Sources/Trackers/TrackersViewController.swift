@@ -106,6 +106,7 @@ final class TrackersViewController: UIViewController {
         setupNavigationBar()
         setupCollectionView()
         loadData()
+        setupContextMenuActions()
         updateDateButtonTitle()
     }
     
@@ -167,7 +168,7 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Data Loading
     
-    private func loadData() {
+    @objc private func loadData() {
         let categoriesCD = categoryStore.fetchAllCategories()
         
         trackers = categoriesCD.compactMap { categoryStore.makeCategory(from: $0) }
@@ -266,18 +267,27 @@ final class TrackersViewController: UIViewController {
         let systemWeekday = calendar.component(.weekday, from: currentDate)
         let myWeekday = (systemWeekday + 5) % 7
         
-        filteredTrackers = trackers.map { category in
-            let filteredItems = category.trackers.filter { tracker in
-                switch tracker.type {
-                case .habit:
-                    return tracker.schedule?.contains(myWeekday) ?? false
-                case .irregularEvent:
-                    return calendar.isDate(tracker.createdDate, inSameDayAs: currentDate)
-                }
-            }
-            return (category.title, filteredItems)
+        filteredTrackers = []
+        
+        // Закреплённые трекеры
+        let pinned = trackers
+            .flatMap { $0.trackers }
+            .filter { $0.isPinned && ($0.schedule?.contains(myWeekday) ?? false || calendar.isDate($0.createdDate, inSameDayAs: currentDate)) }
+        
+        if !pinned.isEmpty {
+            filteredTrackers.append(("Закреплённые", pinned))
         }
-        .filter { !$0.items.isEmpty }
+        
+        // Обычные трекеры по категориям
+        for category in trackers {
+            let filteredItems = category.trackers.filter {
+                !$0.isPinned &&
+                (($0.schedule?.contains(myWeekday) ?? false) || calendar.isDate($0.createdDate, inSameDayAs: currentDate))
+            }
+            if !filteredItems.isEmpty {
+                filteredTrackers.append((category.title, filteredItems))
+            }
+        }
         
         collectionView.reloadData()
         emptyPlaceholderView.isHidden = !filteredTrackers.isEmpty
@@ -297,12 +307,75 @@ final class TrackersViewController: UIViewController {
         
         collectionView.reloadItems(at: [indexPath])
     }
+    
+    private func setupContextMenuActions() {
+        NotificationCenter.default.addObserver(self, selector: #selector(handlePinTracker(_:)), name: NSNotification.Name("PinTracker"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleEditTracker(_:)), name: NSNotification.Name("EditTracker"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleDeleteTracker(_:)), name: NSNotification.Name("DeleteTrackerConfirmed"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleReloadTrackersAfterPin), name: NSNotification.Name("ReloadTrackersAfterPin"), object: nil)
+    }
+    
+    @objc private func handlePinTracker(_ notification: Notification) {
+        if let tracker = notification.userInfo?["tracker"] as? Tracker {
+            print("Закрепить трекер: \(tracker.name)")
+            trackerStore.togglePin(for: tracker)
+            NotificationCenter.default.post(name: NSNotification.Name("ReloadTrackersAfterPin"), object: nil)
+            self.loadData()
+        }
+    }
+    
+    @objc private func handleEditTracker(_ notification: Notification) {
+        if let tracker = notification.userInfo?["tracker"] as? Tracker {
+            print("Редактировать трекер: \(tracker.name)")
+            let detailsVC = CreateTrackerDetailsViewController(trackerType: tracker.type)
+            detailsVC.trackerToEdit = tracker
+            detailsVC.onEditTracker = { [weak self] updatedTracker in
+                guard let self = self else { return }
+                self.trackerStore.updateTracker(updatedTracker)
+                self.loadData()
+            }
+            let navController = UINavigationController(rootViewController: detailsVC)
+            navController.modalPresentationStyle = .pageSheet
+            present(navController, animated: true)
+        }
+    }
+    
+    @objc private func handleDeleteTracker(_ notification: Notification) {
+        guard let tracker = notification.userInfo?["tracker"] as? Tracker else { return }
+        
+        let alert = UIAlertController(
+            title: nil,
+            message: "Уверены, что хотите удалить трекер?",
+            preferredStyle: .actionSheet
+        )
+        
+        let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in
+            guard let self = self else { return }
+            self.trackerStore.deleteTracker(tracker)
+            self.loadData()
+        }
+        
+        let cancelAction = UIAlertAction(title: "Отменить", style: .cancel, handler: nil)
+        
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
+        
+        present(alert, animated: true, completion: nil)
+    }
+    
+    @objc private func handleReloadTrackersAfterPin() {
+        loadData()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
 }
 
 // MARK: - Navigation Bar Setup
 extension TrackersViewController {
     private func setupNavigationBar() {
-        title = ""
+        title = "Трекеры"
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(named: "iconPlus"),
@@ -366,7 +439,6 @@ extension TrackersViewController: UICollectionViewDataSource {
             guard let self = self, !isFutureDate else { return }
             self.toggleCompletion(for: tracker, at: indexPath)
         }
-        
         return cell
     }
     
@@ -408,3 +480,4 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
         return CGSize(width: cellWidth, height: cellHeight)
     }
 }
+

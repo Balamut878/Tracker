@@ -46,6 +46,7 @@ final class TrackerStore: NSObject {
         trackerCD.schedule = convertScheduleToString(tracker.schedule)
         trackerCD.type = (tracker.type == .habit) ? "habit" : "irregular"
         trackerCD.createdDate = tracker.createdDate
+        trackerCD.isPinned = false
         
         trackerCD.category = category
         
@@ -87,9 +88,70 @@ final class TrackerStore: NSObject {
             schedule: schedule,
             type: type,
             createdDate: createdDate,
-            completedDates: [],
-            categoryTitle: cdObject.category?.title ?? "По умолчанию"
+            completedDates: cdObject.records?.compactMap {
+                ($0 as? TrackerRecordCoreData)?.date
+            } ?? [],
+            categoryTitle: cdObject.category?.title ?? "По умолчанию",
+            isPinned: cdObject.isPinned
+            
         )
+    }
+    
+    // MARK: - Обновление трекера
+    func updateTracker(_ updatedTracker: Tracker) {
+        let context = store.persistentContainer.viewContext
+        let request: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", updatedTracker.id as CVarArg)
+        
+        do {
+            if let trackerCD = try context.fetch(request).first {
+                trackerCD.name = updatedTracker.name
+                trackerCD.emoji = updatedTracker.emoji
+                trackerCD.color = convertColorToString(updatedTracker.color)
+                trackerCD.schedule = convertScheduleToString(updatedTracker.schedule)
+                trackerCD.type = (updatedTracker.type == .habit) ? "habit" : "irregular"
+                trackerCD.createdDate = updatedTracker.createdDate
+                trackerCD.isPinned = updatedTracker.isPinned
+                store.saveContext()
+            }
+        } catch {
+            print("Ошибка при обновлении трекера: \(error)")
+        }
+    }
+    
+    // MARK: - Удаление трекера
+    func deleteTracker(_ tracker: Tracker) {
+        let context = store.persistentContainer.viewContext
+        let request: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
+        
+        do {
+            if let trackerCD = try context.fetch(request).first {
+                context.delete(trackerCD)
+                store.saveContext()
+            }
+        } catch {
+            print("Ошибка при удалении трекера: \(error)")
+        }
+    }
+    
+    // MARK: - Переключение закрепления трекера
+    func togglePin(for tracker: Tracker) {
+        let context = store.persistentContainer.viewContext
+        let request: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
+        
+        do {
+            if let trackerCD = try context.fetch(request).first {
+                trackerCD.isPinned = !(trackerCD.isPinned)
+                store.saveContext()
+                try? fetchedResultsController?.performFetch()
+                NotificationCenter.default.post(name: NSNotification.Name("TrackerStoreDidUpdate"), object: nil)
+                NotificationCenter.default.post(name: NSNotification.Name("ReloadTrackersAfterPin"), object: nil)
+            }
+        } catch {
+            print("Ошибка при переключении закрепления трекера: \(error)")
+        }
     }
     
     // MARK: - Вспомогательные методы конвертации
@@ -124,13 +186,16 @@ final class TrackerStore: NSObject {
     }
     
     private func convertScheduleToString(_ schedule: [Int]?) -> String? {
-        guard let schedule = schedule else { return nil }
-        return schedule.map { String($0) }.joined(separator: ",")
+        guard let schedule = schedule, !schedule.isEmpty else { return nil }
+        return schedule.map(String.init).joined(separator: ",")
     }
     
     private func convertStringToSchedule(_ string: String?) -> [Int]? {
         guard let string = string, !string.isEmpty else { return nil }
         return string.split(separator: ",").compactMap { Int($0) }
+    }
+    
+    @objc private func loadData() {
     }
 }
 

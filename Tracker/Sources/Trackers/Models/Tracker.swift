@@ -22,6 +22,7 @@ struct Tracker {
     let createdDate: Date
     let completedDates: [Date]
     let categoryTitle: String
+    let isPinned: Bool
     
     init(
         id: UUID,
@@ -32,7 +33,8 @@ struct Tracker {
         type: TrackerType,
         createdDate: Date,
         completedDates: [Date],
-        categoryTitle: String
+        categoryTitle: String,
+        isPinned: Bool
     ) {
         self.id = id
         self.name = name
@@ -43,5 +45,6 @@ struct Tracker {
         self.createdDate = createdDate
         self.completedDates = completedDates
         self.categoryTitle = categoryTitle
+        self.isPinned = isPinned
     }
 }

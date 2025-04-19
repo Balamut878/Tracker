@@ -11,6 +11,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
     
     private let trackerType: Tracker.TrackerType
     var onCreateTracker: ((Tracker) -> Void)?
+    var onEditTracker: ((Tracker) -> Void)?
     
     private var options: [String] = []
     private var selectedValues: [String?] = []
@@ -23,6 +24,8 @@ final class CreateTrackerDetailsViewController: UIViewController {
     private var selectedEmojiIndex: IndexPath?
     private var selectedColorIndex: IndexPath?
     
+    var trackerToEdit: Tracker?
+    
     private let colorList: [UIColor] = (1...18).compactMap { UIColor(named: "Color selection \($0)") }
     
     private let maxNameLength = 38
@@ -30,6 +33,16 @@ final class CreateTrackerDetailsViewController: UIViewController {
     private var selectedCategoryCD: TrackerCategoryCoreData?
     
     // MARK: - UI Элементы
+    private let daysCountLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
+        label.textColor = UIColor(named: "Black[day]")
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = true
+        return label
+    }()
+    
     private let nameTextField: UITextField = {
         let textField = UITextField()
         textField.attributedPlaceholder = NSAttributedString(
@@ -205,6 +218,44 @@ final class CreateTrackerDetailsViewController: UIViewController {
         setupEmojiCollectionView()
         setupColorCollectionView()
         
+        if let tracker = trackerToEdit {
+            navigationItem.title = "Редактирование привычки"
+            nameTextField.text = tracker.name
+            
+            if let emojiIndex = emojiList.firstIndex(of: tracker.emoji) {
+                selectedEmojiIndex = IndexPath(item: emojiIndex, section: 0)
+            }
+            
+            if let colorIndex = colorList.firstIndex(of: tracker.color) {
+                selectedColorIndex = IndexPath(item: colorIndex, section: 0)
+            }
+            
+            selectedDaysIndices = tracker.schedule ?? []
+            
+            let categoryStore = TrackerCategoryStore()
+            let allCategories = categoryStore.fetchAllCategories()
+            if let matchedCategory = allCategories.first(where: { $0.title == tracker.categoryTitle }) {
+                selectedCategoryCD = matchedCategory
+            }
+            
+            if trackerType == .habit {
+                selectedValues = [tracker.categoryTitle, formattedSchedule(from: tracker.schedule ?? [])]
+            } else {
+                selectedValues = [tracker.categoryTitle]
+            }
+            
+            emojiCollectionView.reloadData()
+            colorCollectionView.reloadData()
+            tableView.reloadData()
+            if tracker.completedDates.count > 0 {
+                daysCountLabel.isHidden = false
+                let count = tracker.completedDates.count
+                daysCountLabel.text = "\(count) \(pluralForm(for: count))"
+            } else {
+                daysCountLabel.isHidden = true
+            }
+        }
+        
         nameTextField.delegate = self
         
         tableViewContainerHeightConstraint.constant = trackerType == .habit ? 150 : 75
@@ -235,6 +286,7 @@ final class CreateTrackerDetailsViewController: UIViewController {
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
         ])
         
+        contentView.addSubview(daysCountLabel)
         contentView.addSubview(nameTextField)
         contentView.addSubview(errorLabel)
         contentView.addSubview(tableViewContainer)
@@ -249,7 +301,9 @@ final class CreateTrackerDetailsViewController: UIViewController {
         contentView.addSubview(createButton)
         
         NSLayoutConstraint.activate([
-            nameTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
+            daysCountLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
+            daysCountLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            nameTextField.topAnchor.constraint(equalTo: daysCountLabel.bottomAnchor, constant: 12),
             nameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             nameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             nameTextField.heightAnchor.constraint(equalToConstant: 75),
@@ -347,8 +401,9 @@ final class CreateTrackerDetailsViewController: UIViewController {
     
     @objc private func createButtonTapped() {
         guard createButton.isEnabled else { return }
-        let newTracker = Tracker(
-            id: UUID(),
+        
+        let updatedTracker = Tracker(
+            id: trackerToEdit?.id ?? UUID(),
             name: nameTextField.text ?? "",
             emoji: {
                 if let index = selectedEmojiIndex?.item, emojiList.indices.contains(index) {
@@ -366,15 +421,48 @@ final class CreateTrackerDetailsViewController: UIViewController {
             }(),
             schedule: trackerType == .habit ? selectedDaysIndices : nil,
             type: trackerType,
-            createdDate: Date(),
-            completedDates: [],
-            categoryTitle: selectedCategoryCD?.title ?? "По умолчанию"
+            createdDate: trackerToEdit?.createdDate ?? Date(),
+            completedDates: trackerToEdit?.completedDates ?? [],
+            categoryTitle: selectedCategoryCD?.title ?? "По умолчанию",
+            isPinned: trackerToEdit?.isPinned ?? false
         )
-        onCreateTracker?(newTracker)
+        
+        if trackerToEdit != nil {
+            onEditTracker?(updatedTracker)
+        } else {
+            onCreateTracker?(updatedTracker)
+        }
+        
         if let presentingVC = self.presentingViewController?.presentingViewController {
             presentingVC.dismiss(animated: true)
         } else {
             dismiss(animated: true)
+        }
+    }
+    
+    private func formattedSchedule(from days: [Int]) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        
+        guard let weekdays = formatter.shortWeekdaySymbols else {
+            return ""
+        }
+        
+        return days.sorted().compactMap { index in
+            weekdays.indices.contains(index) ? weekdays[index] : nil
+        }.joined(separator: ", ")
+    }
+    
+    private func pluralForm(for days: Int) -> String {
+        let remainder10 = days % 10
+        let remainder100 = days % 100
+        
+        if remainder10 == 1 && remainder100 != 11 {
+            return "день"
+        } else if (2...4).contains(remainder10) && !(12...14).contains(remainder100) {
+            return "дня"
+        } else {
+            return "дней"
         }
     }
 }
