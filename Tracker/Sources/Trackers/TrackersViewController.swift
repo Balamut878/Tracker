@@ -41,7 +41,7 @@ final class TrackersViewController: UIViewController {
         container.addSubview(imageView)
         
         let label = UILabel()
-        label.text = "Что будем отслеживать?"
+        label.text = NSLocalizedString("empty_placeholder", comment: "")
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textColor = UIColor(named: "Black[day]")
         label.textAlignment = .center
@@ -61,7 +61,7 @@ final class TrackersViewController: UIViewController {
     
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
-        searchBar.placeholder = "Поиск"
+        searchBar.placeholder = NSLocalizedString("search_placeholder", comment: "")
         searchBar.searchBarStyle = .minimal
         searchBar.backgroundImage = UIImage()
         searchBar.searchTextField.textColor = UIColor(named: "Gray")
@@ -114,7 +114,7 @@ final class TrackersViewController: UIViewController {
         let titleLabel: UILabel = {
             let label = UILabel()
             label.translatesAutoresizingMaskIntoConstraints = false
-            label.text = "Трекеры"
+            label.text = NSLocalizedString("trackers_title", comment: "")
             label.font = UIFont.systemFont(ofSize: 34, weight: .bold)
             label.textColor = UIColor(named: "Black[day]")
             label.textAlignment = .left
@@ -375,7 +375,7 @@ final class TrackersViewController: UIViewController {
 // MARK: - Navigation Bar Setup
 extension TrackersViewController {
     private func setupNavigationBar() {
-        title = "Трекеры"
+        navigationItem.title = ""
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(named: "iconPlus"),

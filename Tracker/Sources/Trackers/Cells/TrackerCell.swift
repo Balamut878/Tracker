@@ -153,13 +153,19 @@ final class TrackerCell: UICollectionViewCell {
         titleLabel.text = tracker.name
         
         let dayString: String
-        switch count % 10 {
-        case 1 where count % 100 != 11:
-            dayString = "день"
-        case 2...4 where !(11...14).contains(count % 100):
-            dayString = "дня"
-        default:
-            dayString = "дней"
+        let languageCode = Locale.current.languageCode
+        
+        if languageCode == "ru" {
+            switch count % 10 {
+            case 1 where count % 100 != 11:
+                dayString = NSLocalizedString("day_singular", comment: "день")
+            case 2...4 where !(12...14).contains(count % 100):
+                dayString = NSLocalizedString("day_few", comment: "дня")
+            default:
+                dayString = NSLocalizedString("day_many", comment: "дней")
+            }
+        } else {
+            dayString = count == 1 ? NSLocalizedString("day_singular", comment: "day") : NSLocalizedString("day_many", comment: "days")
         }
         counterLabel.text = "\(count) \(dayString)"
         

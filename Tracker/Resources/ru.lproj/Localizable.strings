@@ -1,0 +1,20 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Александр Дудченко on 19.04.2025.
+  
+*/
+
+"trackers_title" = "Трекеры";
+"search_placeholder" = "Поиск";
+"edit_action" = "Редактировать";
+"delete_action" = "Удалить";
+"pin_action" = "Закрепить";
+"unpin_action" = "Открепить";
+"filters_button" = "Фильтры";
+"tab_trackers" = "Трекеры";
+"tab_statistics" = "Статистика";
+"day_singular" = "день";
+"day_few" = "дня";
+"day_many" = "дней";

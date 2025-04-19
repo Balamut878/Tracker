@@ -28,6 +28,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if UserDefaults.standard.bool(forKey: UserDefaultsKeys.hasSeenOnboarding) {
             // Показываем главный экран
             let tabBarController = UITabBarController()
+            tabBarController.tabBar.isTranslucent = false
             tabBarController.tabBar.layer.borderColor = UIColor.lightGray.cgColor
             tabBarController.tabBar.layer.borderWidth = 0.5
             tabBarController.tabBar.clipsToBounds = true
@@ -35,7 +36,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let trackersVC = TrackersViewController()
             let trackersNav = UINavigationController(rootViewController: trackersVC)
             trackersNav.tabBarItem = UITabBarItem(
-                title: "Трекеры",
+                title: NSLocalizedString("tab_trackers", comment: "Trackers tab title"),
                 image: UIImage(named: "TrackersIcon"),
                 tag: 0
             )
@@ -43,7 +44,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let statisticsVC = StatisticsViewController()
             let statisticsNav = UINavigationController(rootViewController: statisticsVC)
             statisticsNav.tabBarItem = UITabBarItem(
-                title: "Статистика",
+                title: NSLocalizedString("tab_statistics", comment: "Statistics tab title"),
                 image: UIImage(named: "StatisticsIcon"),
                 tag: 1
             )
