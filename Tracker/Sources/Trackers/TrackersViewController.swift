@@ -26,6 +26,7 @@ final class TrackersViewController: UIViewController {
     private let recordStore = TrackerRecordStore()
     
     private var filteredTrackers: [(category: String, items: [Tracker])] = []
+    private var filterButton: UIButton?
     
     // MARK: - UI Elements
     private let emptyPlaceholderView: UIView = {
@@ -124,6 +125,22 @@ final class TrackersViewController: UIViewController {
         
         view.addSubview(searchBar)
         view.addSubview(collectionView)
+        
+        let filterButton: UIButton = {
+            let button = UIButton(type: .system)
+            button.setTitle(NSLocalizedString("filters_button", comment: ""), for: .normal)
+            button.setTitleColor(UIColor(named: "White[day]"), for: .normal)
+            button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+            button.backgroundColor = UIColor(named: "Blue")
+            button.layer.cornerRadius = 16
+            button.translatesAutoresizingMaskIntoConstraints = false
+            button.contentEdgeInsets = UIEdgeInsets(top: 14, left: 20, bottom: 14, right: 20)
+            return button
+        }()
+        view.addSubview(filterButton)
+        filterButton.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
+        self.filterButton = filterButton
+        
         view.addSubview(emptyPlaceholderView)
         emptyPlaceholderView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -143,10 +160,15 @@ final class TrackersViewController: UIViewController {
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            filterButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            filterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            filterButton.widthAnchor.constraint(equalToConstant: 114),
+            filterButton.heightAnchor.constraint(equalToConstant: 50),
             
             emptyPlaceholderView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyPlaceholderView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
+        collectionView.contentInset.bottom = 90
     }
     
     // MARK: - Collection View Setup
@@ -369,6 +391,14 @@ final class TrackersViewController: UIViewController {
     
     deinit {
         NotificationCenter.default.removeObserver(self)
+    }
+}
+
+extension TrackersViewController {
+    @objc private func filterButtonTapped() {
+        let filterVC = FilterViewController(selectedFilter: .all)
+        filterVC.modalPresentationStyle = UIModalPresentationStyle.pageSheet
+        present(filterVC, animated: true)
     }
 }
 
