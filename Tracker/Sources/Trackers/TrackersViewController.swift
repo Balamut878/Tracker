@@ -26,14 +26,16 @@ final class TrackersViewController: UIViewController {
     private let recordStore = TrackerRecordStore()
     
     private var filteredTrackers: [(category: String, items: [Tracker])] = []
-    private var filterButton: UIButton?
+    private var filterButton: UIButton!
+    
+    private var selectedFilter: TrackerFilterType = .all
     
     // MARK: - UI Elements
     private let emptyPlaceholderView: UIView = {
         let container = UIView()
         container.isHidden = true
         
-        let imageView = UIImageView(image: UIImage(named: "iconPlaceholderStar"))
+        let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.tintColor = .gray
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -42,7 +44,6 @@ final class TrackersViewController: UIViewController {
         container.addSubview(imageView)
         
         let label = UILabel()
-        label.text = NSLocalizedString("empty_placeholder", comment: "")
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textColor = UIColor(named: "Black[day]")
         label.textAlignment = .center
@@ -62,10 +63,10 @@ final class TrackersViewController: UIViewController {
     
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
-        searchBar.placeholder = NSLocalizedString("search_placeholder", comment: "")
+        searchBar.placeholder = "Поиск"
         searchBar.searchBarStyle = .minimal
         searchBar.backgroundImage = UIImage()
-        searchBar.searchTextField.textColor = UIColor(named: "Gray")
+        searchBar.searchTextField.textColor = UIColor(named: "Black[day]")
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         return searchBar
     }()
@@ -115,7 +116,7 @@ final class TrackersViewController: UIViewController {
         let titleLabel: UILabel = {
             let label = UILabel()
             label.translatesAutoresizingMaskIntoConstraints = false
-            label.text = NSLocalizedString("trackers_title", comment: "")
+            label.text = NSLocalizedString("tab_trackers", comment: "")
             label.font = UIFont.systemFont(ofSize: 34, weight: .bold)
             label.textColor = UIColor(named: "Black[day]")
             label.textAlignment = .left
@@ -123,7 +124,8 @@ final class TrackersViewController: UIViewController {
         }()
         view.addSubview(titleLabel)
         
-        view.addSubview(searchBar)
+        self.view.addSubview(searchBar)
+        self.searchBar.delegate = self
         view.addSubview(collectionView)
         
         let filterButton: UIButton = {
@@ -137,9 +139,12 @@ final class TrackersViewController: UIViewController {
             button.contentEdgeInsets = UIEdgeInsets(top: 14, left: 20, bottom: 14, right: 20)
             return button
         }()
+        filterButton.isUserInteractionEnabled = true
         view.addSubview(filterButton)
-        filterButton.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
         self.filterButton = filterButton
+        self.filterButton.isUserInteractionEnabled = true
+        self.filterButton.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
+        
         
         view.addSubview(emptyPlaceholderView)
         emptyPlaceholderView.translatesAutoresizingMaskIntoConstraints = false
@@ -164,10 +169,10 @@ final class TrackersViewController: UIViewController {
             filterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             filterButton.widthAnchor.constraint(equalToConstant: 114),
             filterButton.heightAnchor.constraint(equalToConstant: 50),
-            
             emptyPlaceholderView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyPlaceholderView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
+        collectionView.contentInset.bottom = 90
         collectionView.contentInset.bottom = 90
     }
     
@@ -284,6 +289,33 @@ final class TrackersViewController: UIViewController {
         dateButton.setTitle(dateString, for: .normal)
     }
     
+    private func updatePlaceholderView(isSearchActive: Bool) {
+        guard let imageView = emptyPlaceholderView.subviews.first(where: { $0 is UIImageView }) as? UIImageView,
+              let label = emptyPlaceholderView.subviews.first(where: { $0 is UILabel }) as? UILabel else { return }
+        
+        if isSearchActive {
+            imageView.image = UIImage(named: "searchPlaceholderMonocle")
+            label.text = "Ничего не найдено"
+        } else {
+            imageView.image = UIImage(named: "iconPlaceholderStar")
+            label.text = "Что будем отслеживать?"
+        }
+    }
+    
+    // MARK: - Filtering Logic
+    private func filter(tracker: Tracker) -> Bool {
+        switch selectedFilter {
+        case .all:
+            return true
+        case .today:
+            return true
+        case .completed:
+            return completedTrackers.contains { $0.trackerID == tracker.id }
+        case .uncompleted:
+            return !completedTrackers.contains { $0.trackerID == tracker.id }
+        }
+    }
+
     private func updateTrackersForSelectedDate() {
         let calendar = Calendar.current
         let systemWeekday = calendar.component(.weekday, from: currentDate)
@@ -294,7 +326,12 @@ final class TrackersViewController: UIViewController {
         // Закреплённые трекеры
         let pinned = trackers
             .flatMap { $0.trackers }
-            .filter { $0.isPinned && ($0.schedule?.contains(myWeekday) ?? false || calendar.isDate($0.createdDate, inSameDayAs: currentDate)) }
+            .filter {
+                $0.isPinned &&
+                ($0.schedule?.contains(myWeekday) ?? false || calendar.isDate($0.createdDate, inSameDayAs: currentDate)) &&
+                (searchBar.text?.isEmpty ?? true || $0.name.lowercased().contains(searchBar.text!.lowercased())) &&
+                filter(tracker: $0)
+            }
         
         if !pinned.isEmpty {
             filteredTrackers.append(("Закреплённые", pinned))
@@ -304,7 +341,9 @@ final class TrackersViewController: UIViewController {
         for category in trackers {
             let filteredItems = category.trackers.filter {
                 !$0.isPinned &&
-                (($0.schedule?.contains(myWeekday) ?? false) || calendar.isDate($0.createdDate, inSameDayAs: currentDate))
+                (($0.schedule?.contains(myWeekday) ?? false) || calendar.isDate($0.createdDate, inSameDayAs: currentDate)) &&
+                (searchBar.text?.isEmpty ?? true || $0.name.lowercased().contains(searchBar.text!.lowercased())) &&
+                filter(tracker: $0)
             }
             if !filteredItems.isEmpty {
                 filteredTrackers.append((category.title, filteredItems))
@@ -313,6 +352,7 @@ final class TrackersViewController: UIViewController {
         
         collectionView.reloadData()
         emptyPlaceholderView.isHidden = !filteredTrackers.isEmpty
+        updatePlaceholderView(isSearchActive: !(searchBar.text?.isEmpty ?? true))
     }
     
     private func toggleCompletion(for tracker: Tracker, at indexPath: IndexPath) {
@@ -396,8 +436,14 @@ final class TrackersViewController: UIViewController {
 
 extension TrackersViewController {
     @objc private func filterButtonTapped() {
-        let filterVC = FilterViewController(selectedFilter: .all)
-        filterVC.modalPresentationStyle = UIModalPresentationStyle.pageSheet
+        let filterVC = FilterViewController(selectedFilter: selectedFilter)
+        filterVC.onFilterSelected = { [weak self] selected in
+            guard let self = self else { return }
+            self.selectedFilter = selected
+            let isActive = selected != .all
+            self.filterButton.setTitleColor(UIColor(named: isActive ? "Red" : "White[day]"), for: .normal)
+            self.updateTrackersForSelectedDate()
+        }
         present(filterVC, animated: true)
     }
 }
@@ -511,3 +557,32 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     }
 }
 
+
+// MARK: - UISearchBarDelegate
+extension TrackersViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        updateTrackersForSelectedDate()
+    }
+
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        searchBar.setShowsCancelButton(true, animated: true)
+        UIView.animate(withDuration: 0.3, animations: {
+            self.filterButton.alpha = 0
+            self.filterButton.transform = CGAffineTransform(translationX: 0, y: 50)
+        })
+    }
+
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+        searchBar.setShowsCancelButton(false, animated: true)
+        updateTrackersForSelectedDate()
+        
+        self.filterButton.alpha = 0
+        self.filterButton.isHidden = false
+        UIView.animate(withDuration: 0.3) {
+            self.filterButton.alpha = 1
+            self.filterButton.transform = .identity
+        }
+    }
+}

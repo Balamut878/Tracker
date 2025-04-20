@@ -45,6 +45,8 @@ extension FilterViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selected = TrackerFilterType.allCases[indexPath.row]
+        selectedFilter = selected
+        tableView.reloadData()
         onFilterSelected?(selected)
         dismiss(animated: true)
     }
@@ -53,6 +55,7 @@ extension FilterViewController: UITableViewDataSource, UITableViewDelegate {
 final class FilterViewController: UIViewController {
     var onFilterSelected: ((TrackerFilterType) -> Void)?
     private var selectedFilter: TrackerFilterType
+    public var currentFilter: TrackerFilterType { selectedFilter }
 
     private let navBar = UINavigationBar()
     private let tableContainerView: UIView = {

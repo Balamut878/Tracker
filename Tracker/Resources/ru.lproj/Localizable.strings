@@ -6,12 +6,6 @@
   
 */
 
-"trackers_title" = "Трекеры";
-"search_placeholder" = "Поиск";
-"edit_action" = "Редактировать";
-"delete_action" = "Удалить";
-"pin_action" = "Закрепить";
-"unpin_action" = "Открепить";
 "filters_button" = "Фильтры";
 "tab_trackers" = "Трекеры";
 "tab_statistics" = "Статистика";
