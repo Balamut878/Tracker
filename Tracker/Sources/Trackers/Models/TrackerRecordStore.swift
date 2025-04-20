@@ -25,6 +25,7 @@ final class TrackerRecordStore: NSObject {
                 record.tracker = trackerCD
                 
                 store.saveContext()
+                NotificationCenter.default.post(name: .trackerRecordDidUpdate, object: nil)
             } else {
                 print("Tracker не найден для trackerID \(trackerID)")
             }
@@ -46,6 +47,7 @@ final class TrackerRecordStore: NSObject {
             if let recordToDelete = try context.fetch(request).first {
                 context.delete(recordToDelete)
                 store.saveContext()
+                NotificationCenter.default.post(name: .trackerRecordDidUpdate, object: nil)
             }
         } catch {
             print("Ошибка при удалении записи: \(error)")
