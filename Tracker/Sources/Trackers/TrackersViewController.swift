@@ -112,6 +112,16 @@ final class TrackersViewController: UIViewController {
         updateDateButtonTitle()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.shared.report(event: "open", screen: "Main")
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        AnalyticsService.shared.report(event: "close", screen: "Main")
+    }
+    
     private func setupUI() {
         let titleLabel: UILabel = {
             let label = UILabel()
@@ -230,6 +240,7 @@ final class TrackersViewController: UIViewController {
             self.loadData()
         }
         
+        AnalyticsService.shared.report(event: "click", screen: "Main", item: "add_track")
         present(navController, animated: true)
         print("Кнопка «+» нажата")
     }
@@ -366,6 +377,7 @@ final class TrackersViewController: UIViewController {
             completedTrackers.insert(record)
             recordStore.createRecord(trackerID: tracker.id, date: day)
         }
+        AnalyticsService.shared.report(event: "click", screen: "Main", item: "track")
         
         collectionView.reloadItems(at: [indexPath])
     }
@@ -398,6 +410,7 @@ final class TrackersViewController: UIViewController {
             }
             let navController = UINavigationController(rootViewController: detailsVC)
             navController.modalPresentationStyle = .pageSheet
+            AnalyticsService.shared.report(event: "click", screen: "Main", item: "edit")
             present(navController, animated: true)
         }
     }
@@ -413,6 +426,7 @@ final class TrackersViewController: UIViewController {
         
         let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in
             guard let self = self else { return }
+            AnalyticsService.shared.report(event: "click", screen: "Main", item: "delete")
             self.trackerStore.deleteTracker(tracker)
             self.loadData()
         }
@@ -444,6 +458,7 @@ extension TrackersViewController {
             self.filterButton.setTitleColor(UIColor(named: isActive ? "Red" : "White[day]"), for: .normal)
             self.updateTrackersForSelectedDate()
         }
+        AnalyticsService.shared.report(event: "click", screen: "Main", item: "filter")
         present(filterVC, animated: true)
     }
 }
@@ -586,3 +601,4 @@ extension TrackersViewController: UISearchBarDelegate {
         }
     }
 }
+
