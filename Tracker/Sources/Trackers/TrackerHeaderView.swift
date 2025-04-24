@@ -15,7 +15,7 @@ final class TrackerHeaderView: UICollectionReusableView {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 19, weight: .bold)
-        label.textColor = UIColor(named: "Black[day]")
+        label.textColor = UIColor(named: "reversedTextColor")
         label.numberOfLines = 1
         label.lineBreakMode = .byTruncatingTail
         label.translatesAutoresizingMaskIntoConstraints = false

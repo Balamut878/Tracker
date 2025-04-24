@@ -91,7 +91,7 @@ final class TrackersViewController: UIViewController {
         layout.estimatedItemSize = .zero
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .white
+        collectionView.backgroundColor = UIColor(named: "backgroundDynamic")
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.contentInsetAdjustmentBehavior = .automatic
         return collectionView
@@ -101,7 +101,7 @@ final class TrackersViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(named: "White[day]")
+        view.backgroundColor = UIColor(named: "backgroundDynamic")
         
         setupUI()
         dateButton.addTarget(self, action: #selector(dateButtonTapped), for: .touchUpInside)
@@ -128,7 +128,7 @@ final class TrackersViewController: UIViewController {
             label.translatesAutoresizingMaskIntoConstraints = false
             label.text = NSLocalizedString("tab_trackers", comment: "")
             label.font = UIFont.systemFont(ofSize: 34, weight: .bold)
-            label.textColor = UIColor(named: "Black[day]")
+            label.textColor = UIColor(named: "reversedTextColor")
             label.textAlignment = .left
             return label
         }()
@@ -474,7 +474,7 @@ extension TrackersViewController {
             target: self,
             action: #selector(addTrackerTapped)
         )
-        navigationItem.leftBarButtonItem?.tintColor = UIColor(named: "Black[day]")
+        navigationItem.leftBarButtonItem?.tintColor = UIColor(named: "reversedTextColor")
         
         let dateWrapperView = UIView(frame: CGRect(x: 0, y: 0, width: 77, height: 34))
         dateWrapperView.addSubview(dateButton)

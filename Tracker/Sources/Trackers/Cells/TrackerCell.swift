@@ -59,7 +59,7 @@ final class TrackerCell: UICollectionViewCell {
     private let counterLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .black
+        label.textColor = UIColor(named: "reversedTextColor")
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -172,7 +172,7 @@ final class TrackerCell: UICollectionViewCell {
         let imageName = isCompleted ? "iconCheckmark" : "iconPlus"
         if let icon = UIImage(named: imageName)?.withRenderingMode(.alwaysTemplate) {
             completeButton.setImage(icon, for: .normal)
-            completeButton.tintColor = .white
+            completeButton.tintColor = UIColor(named: "contrastIconColor")
         } else {
             completeButton.setImage(nil, for: .normal)
         }
