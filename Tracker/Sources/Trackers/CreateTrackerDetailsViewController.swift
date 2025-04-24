@@ -226,11 +226,15 @@ final class CreateTrackerDetailsViewController: UIViewController {
                 selectedEmojiIndex = IndexPath(item: emojiIndex, section: 0)
             }
             
-            if let colorIndex = colorList.firstIndex(of: tracker.color) {
-                selectedColorIndex = IndexPath(item: colorIndex, section: 0)
+            if let index = colorList.firstIndex(where: { $0.hexString == tracker.color.hexString }) {
+                selectedColorIndex = IndexPath(item: index, section: 0)
             }
+            colorCollectionView.reloadData()
             
             selectedDaysIndices = tracker.schedule ?? []
+            if trackerType == .habit {
+                selectedValues[1] = formattedSchedule(from: selectedDaysIndices)
+            }
             
             let categoryStore = TrackerCategoryStore()
             let allCategories = categoryStore.fetchAllCategories()
@@ -244,15 +248,18 @@ final class CreateTrackerDetailsViewController: UIViewController {
                 selectedValues = [tracker.categoryTitle]
             }
             
+            tableView.reloadData()
             emojiCollectionView.reloadData()
             colorCollectionView.reloadData()
-            tableView.reloadData()
-            if tracker.completedDates.count > 0 {
-                daysCountLabel.isHidden = false
-                let count = tracker.completedDates.count
-                daysCountLabel.text = "\(count) \(pluralForm(for: count))"
+            
+            let recordStore = TrackerRecordStore()
+            let allRecords = recordStore.fetchAllRecords()
+            let completed = allRecords.filter { $0.tracker?.id == tracker.id }
+            if completed.count > 0 {
+                self.daysCountLabel.isHidden = false
+                self.daysCountLabel.text = "\(completed.count) \(pluralForm(for: completed.count))"
             } else {
-                daysCountLabel.isHidden = true
+                self.daysCountLabel.isHidden = true
             }
         }
         
@@ -464,6 +471,21 @@ final class CreateTrackerDetailsViewController: UIViewController {
         } else {
             return "дней"
         }
+    }
+}
+
+// MARK: - UIColor HexString Extension
+private extension UIColor {
+    var hexString: String {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        let r = Int(red * 255)
+        let g = Int(green * 255)
+        let b = Int(blue * 255)
+        return String(format: "#%02X%02X%02X", r, g, b)
     }
 }
 

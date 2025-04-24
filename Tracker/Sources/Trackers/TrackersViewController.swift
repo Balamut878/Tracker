@@ -263,7 +263,7 @@ final class TrackersViewController: UIViewController {
         datePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
         
         let container = UIView()
-        container.backgroundColor = .white
+        container.backgroundColor = UIColor(named: "backgroundDynamic")
         container.layer.cornerRadius = 13
         container.translatesAutoresizingMaskIntoConstraints = false
         container.layer.shadowColor = UIColor.black.cgColor
@@ -326,7 +326,7 @@ final class TrackersViewController: UIViewController {
             return !completedTrackers.contains { $0.trackerID == tracker.id }
         }
     }
-
+    
     private func updateTrackersForSelectedDate() {
         let calendar = Calendar.current
         let systemWeekday = calendar.component(.weekday, from: currentDate)
@@ -578,7 +578,7 @@ extension TrackersViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         updateTrackersForSelectedDate()
     }
-
+    
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         searchBar.setShowsCancelButton(true, animated: true)
         UIView.animate(withDuration: 0.3, animations: {
@@ -586,7 +586,7 @@ extension TrackersViewController: UISearchBarDelegate {
             self.filterButton.transform = CGAffineTransform(translationX: 0, y: 50)
         })
     }
-
+    
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = ""
         searchBar.resignFirstResponder()

@@ -22,14 +22,14 @@ class StatisticsViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = UIColor(named: "White[day]")
         
         view.addSubview(titleLabel)
-
+        
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 28),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16)
@@ -55,7 +55,7 @@ class StatisticsViewController: UIViewController {
         tableView.estimatedRowHeight = 98
         tableView.dataSource = self
         view.addSubview(tableView)
-
+        
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 32),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -68,12 +68,12 @@ class StatisticsViewController: UIViewController {
         let placeholderContainer = UIView()
         placeholderContainer.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(placeholderContainer)
-
+        
         let imageView = UIImageView(image: UIImage(named: "statisticsPlaceholder"))
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
         placeholderContainer.addSubview(imageView)
-
+        
         let textLabel = UILabel()
         textLabel.text = "Анализировать пока нечего"
         textLabel.textColor = UIColor(named: "Black[day]")
@@ -81,53 +81,60 @@ class StatisticsViewController: UIViewController {
         textLabel.textAlignment = .center
         textLabel.translatesAutoresizingMaskIntoConstraints = false
         placeholderContainer.addSubview(textLabel)
-
+        
         NSLayoutConstraint.activate([
             placeholderContainer.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             placeholderContainer.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-
+            
             imageView.centerXAnchor.constraint(equalTo: placeholderContainer.centerXAnchor),
             imageView.topAnchor.constraint(equalTo: placeholderContainer.topAnchor),
             imageView.widthAnchor.constraint(equalToConstant: 80),
             imageView.heightAnchor.constraint(equalToConstant: 80),
-
+            
             textLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 8),
             textLabel.centerXAnchor.constraint(equalTo: placeholderContainer.centerXAnchor),
             textLabel.bottomAnchor.constraint(equalTo: placeholderContainer.bottomAnchor)
         ])
     }
-
+    
     private func updateUI() {
         let hasStats = statistics.contains { $0.value > 0 }
         tableView.isHidden = !hasStats
         tableView.reloadData()
-        tableView.layoutIfNeeded()      // гарантируем, что Auto‑Layout успеет проставить размеры до первого показа
         if !hasStats {
+            tableView.isHidden = true
             showPlaceholder()
+        } else {
+            removePlaceholderIfNeeded()
         }
     }
-
+    
+    private func removePlaceholderIfNeeded() {
+        view.subviews
+            .filter { $0.subviews.contains(where: { $0 is UIImageView }) }
+            .forEach { $0.removeFromSuperview() }
+    }
+    
     private func calculateStatistics() {
         let allTrackers = trackerStore.fetchAllTrackers()
         let allRecords = recordStore.fetchAllRecords()
-
+        
         guard !allTrackers.isEmpty, !allRecords.isEmpty else {
             statistics = []
             updateUI()
             return
         }
-
+        
         let calendar = Calendar.current
         let sortedRecords = allRecords.sorted {
             guard let date0 = $0.date, let date1 = $1.date else { return false }
             return date0 < date1
         }
-
-        // 1. Самый длинный период
+        
         var longestStreak = 0
         var currentStreak = 0
         var previousDate: Date?
-
+        
         for record in sortedRecords {
             guard let date = record.date else { continue }
             let currentDate = calendar.startOfDay(for: date)
@@ -139,22 +146,19 @@ class StatisticsViewController: UIViewController {
             longestStreak = max(longestStreak, currentStreak)
             previousDate = currentDate
         }
-
-        // 2. Трекеров завершено
+        
         let completedTrackersCount = allRecords.count
-
-        // 3. Среднее значение (кол-во завершенных трекеров в день)
+        
         let uniqueDays = Set(allRecords.compactMap { $0.date.map { calendar.startOfDay(for: $0) } })
         let average = Double(completedTrackersCount) / Double(uniqueDays.count)
         let averageValue = Int(round(average))
-
-        // 4. Идеальные дни (все трекеры дня завершены)
+        
         var perfectDays = 0
         let groupedByDate = Dictionary(grouping: allRecords, by: { record in
             guard let date = record.date else { return Date.distantPast }
             return calendar.startOfDay(for: date)
         })
-
+        
         for (date, recordsOnDate) in groupedByDate {
             let scheduledForDate = allTrackers.filter { tracker in
                 guard let schedule = tracker.schedule else { return false }
@@ -167,7 +171,7 @@ class StatisticsViewController: UIViewController {
                 perfectDays += 1
             }
         }
-
+        
         statistics = [
             StatisticItem(value: longestStreak, title: "Самый длинный период"),
             StatisticItem(value: completedTrackersCount, title: "Трекеров завершено"),
@@ -185,7 +189,7 @@ class StatisticsViewController: UIViewController {
         super.viewWillAppear(animated)
         calculateStatistics()
     }
-
+    
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
@@ -195,7 +199,7 @@ extension StatisticsViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return statistics.count
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "StatisticCell", for: indexPath) as? StatisticCell else {
             return UITableViewCell()

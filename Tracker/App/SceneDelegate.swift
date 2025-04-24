@@ -57,7 +57,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         tabBarAppearance.backgroundColor = UIColor(named: "backgroundDynamic")
         tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(named: "Blue") ?? .blue]
         tabBarAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor(named: "Gray") ?? .gray]
-
+        
         UITabBar.appearance().standardAppearance = tabBarAppearance
         if #available(iOS 15.0, *) {
             UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
