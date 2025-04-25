@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AppMetricaCore
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,6 +15,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        let configuration = AppMetricaConfiguration(apiKey: "cbb001e3-80d8-4312-8589-b65110a41042")
+        AppMetrica.activate(with: configuration!)
         return true
     }
     

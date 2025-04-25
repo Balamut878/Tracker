@@ -99,4 +99,9 @@ final class CreateTrackerViewController: UIViewController {
         present(navController, animated: true, completion: nil)
         print("Выбрано Нерегулярное событие")
     }
+    
+    deinit {
+        AnalyticsService.shared.report(event: "close", screen: "Create")
+        print("🟦 Sending event: close, screen: Create")
+    }
 }

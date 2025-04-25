@@ -10,7 +10,7 @@ import Foundation
 final class TrackerCategoryViewModel {
     
     // MARK: - Public Properties
-    var onCategoriesChanged: (([TrackerCategory]) -> Void)?
+    var didUpdateCategories: (([TrackerCategory]) -> Void)?
     
     // MARK: - Internal Properties
     let trackerCategoryStore: TrackerCategoryStore
@@ -25,18 +25,13 @@ final class TrackerCategoryViewModel {
     // MARK: - Private Methods
     private func fetchCategories() {
         let categories = trackerCategoryStore.fetchCategories()
-        onCategoriesChanged?(categories)
-    }
-    
-    // MARK: - Public Methods
-    func reloadCategories() {
-        fetchCategories()
+        didUpdateCategories?(categories)
     }
 }
 
 // MARK: - TrackerCategoryStoreDelegate
 extension TrackerCategoryViewModel: TrackerCategoryStoreDelegate {
     func didUpdateCategories(_ categories: [TrackerCategory]) {
-        onCategoriesChanged?(categories)
+        didUpdateCategories?(categories)
     }
 }

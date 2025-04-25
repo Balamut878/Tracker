@@ -5,6 +5,10 @@
 //  Created by Александр Дудченко on 23.02.2025.
 //
 
+private enum UserDefaultsKeys {
+    static let hasSeenOnboarding = "hasSeenOnboarding"
+}
+
 import UIKit
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -21,27 +25,24 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let newWindow = UIWindow(windowScene: windowScene)
         
         let rootViewController: UIViewController
-        if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+        if UserDefaults.standard.bool(forKey: UserDefaultsKeys.hasSeenOnboarding) {
             // Показываем главный экран
             let tabBarController = UITabBarController()
-            tabBarController.tabBar.layer.borderColor = UIColor.lightGray.cgColor
-            tabBarController.tabBar.layer.borderWidth = 0.5
-            tabBarController.tabBar.clipsToBounds = true
             
             let trackersVC = TrackersViewController()
             let trackersNav = UINavigationController(rootViewController: trackersVC)
             trackersNav.tabBarItem = UITabBarItem(
-                title: "Трекеры",
+                title: NSLocalizedString("tab_trackers", comment: "Trackers tab title"),
                 image: UIImage(named: "TrackersIcon"),
-                tag: 0
+                selectedImage: UIImage(named: "TrackersIconSelected")
             )
             
             let statisticsVC = StatisticsViewController()
             let statisticsNav = UINavigationController(rootViewController: statisticsVC)
             statisticsNav.tabBarItem = UITabBarItem(
-                title: "Статистика",
+                title: NSLocalizedString("tab_statistics", comment: "Statistics tab title"),
                 image: UIImage(named: "StatisticsIcon"),
-                tag: 1
+                selectedImage: UIImage(named: "StatisticsIconSelected")
             )
             
             tabBarController.viewControllers = [trackersNav, statisticsNav]
@@ -51,6 +52,18 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             rootViewController = OnboardingViewController()
         }
         
+        let tabBarAppearance = UITabBarAppearance()
+        tabBarAppearance.configureWithOpaqueBackground()
+        tabBarAppearance.backgroundColor = UIColor(named: "backgroundDynamic")
+        tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(named: "Blue") ?? .blue]
+        tabBarAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor(named: "Gray") ?? .gray]
+        
+        UITabBar.appearance().standardAppearance = tabBarAppearance
+        if #available(iOS 15.0, *) {
+            UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+        }
+        UITabBar.appearance().tintColor = UIColor(named: "Blue")
+        UITabBar.appearance().unselectedItemTintColor = UIColor(named: "Gray")
         // Делаем TabBarController корневым контроллером
         newWindow.rootViewController = rootViewController
         newWindow.makeKeyAndVisible()
